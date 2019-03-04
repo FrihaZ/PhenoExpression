@@ -10,4 +10,5 @@ Phenotypes and Gene expression datasets (Human and mouse)
 | MGIgeneExpressionQuery_20190304_wildtype.txt.gz | GXD TS28 expression data for MGI IDs in MGI_PhenoGenoMP.rpt (wild type lines) | [downloaded 04/03/2019; http://www.informatics.jax.org/gxd] |
 | HPO_phenotypes | ALL sources all frequencies genes to phentoypes file from HPO | [downloaded 19/02/2019; https://hpo.jax.org/app/download/annotation] |
 | GTEx.gz | GTEX  median TPM by tissue | [dowloaded 02/12/2018; https://gtexportal.org/home/datasets] |
-| GTEX.Tissues.to.HPO.txt | HPO top levels - GTEX tissues | |
+| GTEX.Tissues.to.HPO.txt | HPO top levels - GTEX tissues | manual mapping |
+
