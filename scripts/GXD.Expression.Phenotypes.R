@@ -220,7 +220,7 @@ p %>%
   
   + labs(x= "Top-Level Phenotype", y="Percentage (%) of the Expression Profile for Each Phenotype", title= "The Gene Expression Profiles for Mutant and Wild-Type Mice.",
          tag="A",
-         caption = "The data shows the gene expression profiles found in either mutant or wild-type mice and the frequency.") %>%
+         caption = "The data shows the gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.") %>%
   
   + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
   + theme(plot.caption=element_text(face = "italic", size=12, hjust = 0),
@@ -252,11 +252,6 @@ Express_freq_Discordant_PERC<-Express_freq_0_Discordant %>%
 
 names(Express_freq_Discordant_PERC)[names(Express_freq_Discordant_PERC)=="n"] <- "Frequency"
 
-
-#  select(n, mp.description, Mutant.WT.Expression ) %>%
-#   mutate(Perc= round((Exp,"%")%>%
-#   distinct(Perc, Freq, mp.description, Mutant.WT.Expression)# unique rows
-# 
 
 View(Express_freq_0_Discordant_PERC)
 
@@ -290,7 +285,6 @@ p_Discordant %>%
 
 ################################################################################################################################
 ################################################################################################################################
-
 
 # Concordant graph
 
@@ -394,8 +388,7 @@ chisq$p.value
 ################################################################################################################################
 ################################################################################################################################
 
-# Phenotype specific analysis
-
+# Phenotype specific
 Phenotypes<-data.frame( mgi.genepheno.tissue.ts28_wt_mutant$MP.Term,
                         mgi.genepheno.tissue.ts28_wt_mutant$mp.description,mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression )
 
@@ -405,7 +398,6 @@ names(Phenotypes)[names(Phenotypes)=="mgi.genepheno.tissue.ts28_wt_mutant.MP.Ter
 names(Phenotypes)[names(Phenotypes)=="mgi.genepheno.tissue.ts28_wt_mutant.Mutant.WT.Expression"] <- "Mutant.WT.Expression"
 
 View(Phenotypes)
-
 
 
 ################################################################################################################################
@@ -431,8 +423,6 @@ pheno<- function(phenoname){
   names(x_table)[names(x_table)=="n"] <- "Frequency"
   
 
-  # A graphical representation of the data
-  
   library(ggplot2)
   library(ggthemes)
   
@@ -462,13 +452,12 @@ pheno<- function(phenoname){
     + geom_bar(stat = "identity")%>%    # to create a stacked barchart
     
     
-    +geom_text(aes(label=paste0(x_table$Frequency)),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+    +geom_text(aes(label=paste0(round(x_table$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
     
     + coord_flip() %>%
     + ggsave(filename=paste(phenoname_2,".png",sep=" "), limitsize = TRUE)
   
 }    
-
 
 
 ################################################################################################################################
