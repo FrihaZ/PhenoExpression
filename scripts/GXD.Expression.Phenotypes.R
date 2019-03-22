@@ -241,19 +241,17 @@ p %>%
 ################################################################################################################################
 
 
-# Discordant graph
 
 Express_freq_Discordant <-filter(Express_freq_Perc,  Mutant.WT.Expression == "Yes-No" | Mutant.WT.Expression == "No-Yes") 
 
-Express_freq_Discordant_PERC<-Express_freq_0_Discordant %>%
+Express_freq_Discordant_PERC<-Express_freq_Discordant %>%
   dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
   dplyr::summarise(n=n()) %>%
   dplyr::mutate(Percentage = n/sum(n)*100)
 
 names(Express_freq_Discordant_PERC)[names(Express_freq_Discordant_PERC)=="n"] <- "Frequency"
 
-
-View(Express_freq_0_Discordant_PERC)
+View(Express_freq_Discordant_PERC)
 
 
 
@@ -283,6 +281,8 @@ p_Discordant %>%
   + coord_flip()
 
 
+
+
 ################################################################################################################################
 ################################################################################################################################
 
@@ -290,10 +290,10 @@ p_Discordant %>%
 
 
 
+
 Express_freq_Concordant <-filter(Express_freq_Perc, Mutant.WT.Expression == "Yes-Yes" | Mutant.WT.Expression == "No-No") 
 
-Express_
-freq_Concordant_PERC<-Express_freq_Concordant %>%
+Express_freq_Concordant_PERC<-Express_freq_Concordant %>%
   dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
   dplyr::summarise(n=n()) %>%
   dplyr::mutate(Percentage = n/sum(n)*100)
