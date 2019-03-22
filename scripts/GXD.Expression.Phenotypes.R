@@ -5,7 +5,7 @@
 ### Script: GXD_Tidy_Data.R ###################################################################################################
 ### Purpose: Tidy gene expression data from GXD ###############################################################################
 ### Author: Pilar Cacheiro, Friha Zafar ####################################################################################################
-### Date: 04/03/2019, 08/03/2019 ##########################################################################################################
+### Date: 04/03/2019, 08/03/2019, 22/03/2019 ##########################################################################################################
 
 ###############################################################################################################################
 ###############################################################################################################################
@@ -160,28 +160,310 @@ View(mgi.genepheno.tissue.ts28_wt_mutant)
 
 ################################################################################################################################
 ################################################################################################################################
-
-## To create a Constigency table for the top ancestor node and the expression detection
-
 library(ggplot2)
 library(plyr)
 library(dplyr)
 
-## Join the two expression columns together
+## To create a Constigency table for the top ancestor node and the expression detection
 
-mgi.genepheno.tissue.ts28_wt_mutant<-mgi.genepheno.tissue.ts28_wt_mutant%>%
-  mutate(Mutant.WT.Expression = paste0(TS28.mutant.expression.detected,"-",TS28.wt.expression.detected))
+## Join the two expression columns together 
+
+mgi.genepheno.tissue.ts28_wt_mutant<-mgi.genepheno.tissue.ts28_wt_mutant%>%   # joined mutant and WT expressions
+  mutate(Mutant.WT.Expression = paste0(TS28.mutant.expression.detected,"-",TS28.wt.expression.detected)) %>%
+  dplyr::distinct(MGI.ID, MP.ID, MP.Term, mp.description,EMAPA.ID, EMAPA.Term, Gene.Anatomy,mp.ancestors, TS28.mutant.expression.detected, TS28.wt.expression.detected,Mutant.WT.Expression)  # To remove duplicates
+
+
 
 View(mgi.genepheno.tissue.ts28_wt_mutant)
+
+
+
+# Constingency table with gene names and count the number of No-No, No-Yes, Yes-Yes, Yes-No
+
+Express_freq2<-ftable(mgi.genepheno.tissue.ts28_wt_mutant$MP.ID,
+                      mgi.genepheno.tissue.ts28_wt_mutant$mp.description, 
+                      mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression)
+
+#Express_freq2
+
 
 
 #  Count the number of No-No, No-Yes, Yes-Yes, Yes-No
 
 
-Express_freq<-ftable(mgi.genepheno.tissue.ts28_wt_mutant$MP.ID,
-                    mgi.genepheno.tissue.ts28_wt_mutant$mp.description,
-                    mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression)
-Express_freq
+Express_freq_Perc<-mgi.genepheno.tissue.ts28_wt_mutant %>%
+  dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+
+names(Express_freq_Perc)[names(Express_freq_Perc)=="n"] <- "Frequency"
+
+View(Express_freq_Perc)
 
 ################################################################################################################################
 ################################################################################################################################
+
+
+# A graphical representation of the data
+
+library(ggplot2)
+library(ggthemes)
+
+
+dev.new(width=40, height=20) # to open in a new window
+
+p<-ggplot(data=Express_freq_Perc
+          , aes(x= Express_freq_Perc$mp.description
+                ,y=Express_freq_Perc$Percentage, fill=Express_freq_Perc$Mutant.WT.Expression))
+p %>%
+  
+  + labs(x= "Top-Level Phenotype", y="Percentage (%) of the Expression Profile for Each Phenotype", title= "The Gene Expression Profiles for Mutant and Wild-Type Mice.",
+         tag="A",
+         caption = "The data shows the gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.") %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Keys (Mutant-WT):  ", values = c("No-No" = "red1", "No-Yes" = "darkorange1", "Yes-No" = "darkturquoise", "Yes-Yes"="darkorchid1"))%>%
+  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  +geom_text(aes(label=paste0(round(Express_freq_Perc$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  + coord_flip()
+
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+
+
+Express_freq_Discordant <-filter(Express_freq_Perc,  Mutant.WT.Expression == "Yes-No" | Mutant.WT.Expression == "No-Yes") 
+
+Express_freq_Discordant_PERC<-Express_freq_Discordant %>%
+  dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+names(Express_freq_Discordant_PERC)[names(Express_freq_Discordant_PERC)=="n"] <- "Frequency"
+
+View(Express_freq_Discordant_PERC)
+
+
+
+dev.new(width=40, height=20) # to open in a new window
+
+p_Discordant<-ggplot(data=Express_freq_Discordant_PERC
+                     , aes(x= Express_freq_Discordant_PERC$mp.description
+                           ,y=Express_freq_Discordant_PERC$Percentage, fill=Express_freq_Discordant_PERC$Mutant.WT.Expression))
+p_Discordant %>%
+  
+  + labs(x= "Top-Level Phenotype", y="Frequency of the Expression Profile", title= "The Discordant Gene Expression Profiles for Mutant and Wild-Type Mice.",
+         tag="B",
+         caption = "The data shows the discordant gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.") %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "red1", "No-Yes" = "darkorange1", "Yes-No" = "darkturquoise", "Yes-Yes"="darkorchid1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  +geom_text(aes(label=paste0(round(Express_freq_Discordant_PERC$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip()
+
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+# Concordant graph
+
+
+
+
+Express_freq_Concordant <-filter(Express_freq_Perc, Mutant.WT.Expression == "Yes-Yes" | Mutant.WT.Expression == "No-No") 
+
+Express_freq_Concordant_PERC<-Express_freq_Concordant %>%
+  dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+names(Express_freq_Concordant_PERC)[names(Express_freq_Concordant_PERC)=="n"] <- "Frequency"
+
+
+View(Express_freq_Concordant_PERC)
+
+
+
+dev.new(width=40, height=20) # to open in a new window
+
+p_Concordant<-ggplot(data=Express_freq_Concordant_PERC
+                     , aes(x= Express_freq_Concordant_PERC$mp.description
+                           ,y=Express_freq_Concordant_PERC$Percentage , fill=Express_freq_Concordant_PERC$Mutant.WT.Expression))
+p_Concordant %>%
+  
+  + labs(x= "Top-Level Phenotype", y="Frequency of the Expression Profile", title= "The Concordant Gene Expression Profiles for Mutant and Wild-Type Mice.",
+         tag="C",
+         caption = "The data shows the concordant gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.") %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "red1", "No-Yes" = "darkorange1", "Yes-No" = "darkturquoise", "Yes-Yes"="darkorchid1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  +geom_text(aes(label=paste0(round(Express_freq_Concordant_PERC$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  
+  + coord_flip()
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+
+
+# Creating a variable for each Mutant and WT count
+
+Yes_Yes <- sum(mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression == "Yes-Yes")
+Yes_Yes
+
+Yes_No <- sum(mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression == "Yes-No")
+Yes_No
+
+No_Yes <- sum(mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression == "No-Yes")
+No_Yes
+
+No_No <- sum(mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression == "No-No")
+No_No
+
+# Creating Matrix
+
+WT_MUTANT = matrix( c(Yes_Yes,No_Yes,Yes_No, No_No ), # the data elements 
+                    nrow=2,              # number of rows 
+                    ncol=2,              # number of columns 
+                    byrow = TRUE)
+
+
+row.names(WT_MUTANT) <- c("WT_Yes", "WT_No")   # row names
+
+colnames(WT_MUTANT) <- c("Mutant_Yes", "Mutant_No")   #column names
+
+
+View(WT_MUTANT)
+
+################################################################################################################################
+################################################################################################################################
+
+
+# Carry out Chi-squared test
+
+chisq<- chisq.test(WT_MUTANT)
+
+chisq$expected
+chisq$observed
+
+chisq$p.value 
+
+# = 0.002184877 if alpha value is 0.05 then the p-value is <alpha therefore the H0 can be rejected, and the H1 can be accepted. 
+# The observed values did not occur by chance 
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+# Phenotype specific
+Phenotypes<-data.frame( mgi.genepheno.tissue.ts28_wt_mutant$MP.Term,
+                        mgi.genepheno.tissue.ts28_wt_mutant$mp.description,mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression )
+
+
+names(Phenotypes)[names(Phenotypes)=="mgi.genepheno.tissue.ts28_wt_mutant.mp.description"] <- "mp.description"
+names(Phenotypes)[names(Phenotypes)=="mgi.genepheno.tissue.ts28_wt_mutant.MP.Term"] <- "MP.Term"
+names(Phenotypes)[names(Phenotypes)=="mgi.genepheno.tissue.ts28_wt_mutant.Mutant.WT.Expression"] <- "Mutant.WT.Expression"
+
+View(Phenotypes)
+
+
+################################################################################################################################
+################################################################################################################################
+
+#Function to create a plot for each phenotype.
+
+pheno<- function(phenoname){
+  
+  
+  # Retrieve all phenotype names, match  'phenoname' to the mp.description  
+  
+  x_table<-Phenotypes%>%
+    select(mp.description,MP.Term,Mutant.WT.Expression)%>%
+    filter(mp.description== phenoname )%>%
+    
+    dplyr::group_by(MP.Term,Mutant.WT.Expression) %>%
+    dplyr::summarise(n=n()) %>%
+    dplyr::mutate(Percentage = n/sum(n)*100) %>%
+    
+    distinct(MP.Term,Mutant.WT.Expression, Percentage, n)
+  
+  names(x_table)[names(x_table)=="n"] <- "Frequency"
+  
+
+  library(ggplot2)
+  library(ggthemes)
+  
+  
+  dev.new(width=40, height=20) # to open in a new window
+  
+  phenoname_p<-ggplot(data=x_table
+                      , aes(x= x_table$MP.Term
+                            ,y=x_table$Percentage, fill=x_table$Mutant.WT.Expression))
+  
+  phenoname_2<-  gsub("/", "-", phenoname , fixed = TRUE)
+  
+  phenoname_p %>%
+    
+    + labs(x= "Top-Level Phenotype", y="Frequency of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice: ', phenoname),
+           tag= paste(phenoname),
+           caption = paste("The data shows the gene expression profiles found in", phenoname ,"in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+    
+    + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+    + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+            text = element_text(size=10),
+            legend.position = "bottom",legend.direction = "horizontal",
+            legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+            axis.text.x = element_text(angle = 90, hjust = 1),
+            panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+    +scale_fill_manual("Keys (Mutant-WT):  ", values = c("No-No" = "red1", "No-Yes" = "darkorange1", "Yes-No" = "darkturquoise", "Yes-Yes"="darkorchid1"))%>%
+    + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+    
+    
+    +geom_text(aes(label=paste0(round(x_table$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+    
+    + coord_flip() %>%
+    + ggsave(filename=paste(phenoname_2,".png",sep=" "), limitsize = TRUE)
+  
+}    
+
+
+################################################################################################################################
+################################################################################################################################
+
+# Use the function for each phenotype
+
+
+pheno("vision/eye phenotype")
