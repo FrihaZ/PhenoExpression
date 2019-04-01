@@ -8,8 +8,12 @@ Phenotypes and Gene expression datasets (Human and mouse)
 | MGI_PhenoGenoMP.rpt | Genotypes and Mammalian Phenotype Annotations for Marker Type Genes excluding conditional mutations | [downloaded 01/03/2019; http://www.informatics.jax.org/downloads/reports/index.html#expression] |
 | MGIgeneExpressionQuery_20190304_mutant.txt.gz | GXD TS28 expression data for MGI IDs in MGI_PhenoGenoMP.rpt (mutant lines) | [downloaded 04/03/2019; http://www.informatics.jax.org/gxd] |
 | MGIgeneExpressionQuery_20190304_wildtype.txt.gz | GXD TS28 expression data for MGI IDs in MGI_PhenoGenoMP.rpt (wild type lines) | [downloaded 04/03/2019; http://www.informatics.jax.org/gxd] |
-| HPO_phenotypes | ALL sources all frequencies genes to phentoypes file from HPO | [downloaded 19/02/2019; https://hpo.jax.org/app/download/annotation] |
-| GTEx.gz | GTEX  median TPM by tissue | [dowloaded 02/12/2018; https://gtexportal.org/home/datasets] |
+| HPO_phenotypes | ALL sources all frequencies genes to phentoypes file from HPO | [downloaded 19/02/2019; https://hpo.jax.org/app/download/annotation] | 
+| hpo.ancestor.nodes.txt | hpo ids to hpo top levels ids | from http://purl.obolibrary.org/obo/hp.obo |
+| hpo.toplevels.phenotypic.abnormalities.only.txt | desciption of hpo top levels (only phenotypic abnormalities) | from http://purl.obolibrary.org/obo/hp.obo |  
+| GTEx.TPM.gz | GTEX  median TPM by tissue | [dowloaded 02/12/2018; https://gtexportal.org/home/datasets] |
 | GTEX.Tissues.to.HPO.txt | HPO top levels - GTEX tissues | manual mapping |
 | mp.ancestor.nodes.txt | mp terms - mapping to all the ancestor nodes | from https://github.com/pilarcacheiro/Ontologies/tree/master/scripts MP_obo_to_txt.R |
-| mp.top.levels.txt | top levels of the mammalian phenotype ontology | from https://github.com/pilarcacheiro/Ontologies/tree/master/scripts MP_obo_to_txt.R |
+| mp.top.levels.txt | top levels of the mammalian phenotype ontology | from https://github.com/pilarcacheiro/Ontologies/tree/master/scripts MP_obo_to_txt.R | 
+| gene_with_protein_product.txt | HGNC file - gene symbols to HGNC ids (input file for hgnc_symbol_checker.R function) | from https://www.genenames.org/ |
+
