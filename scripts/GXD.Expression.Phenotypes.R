@@ -17,6 +17,10 @@ library(dplyr);library(tidyr);library(stringr);library(readr); library(ggplot2);
 ################################################################################################################################
 ################################################################################################################################
 
+#!!!! PLEASE CREATE THESE FILES INSIDE THE DIRECTORY THAT YOU WILL BE SAVING THIS SCRIPT INTO: !!!!!!!!!!!!
+#   ./Plots/Tissue/
+#   ./Plots/Phenotypes/
+
 ## import files ################################################################################################################
 
 ## import and tidy gene expression for TS28 mutant lines
@@ -402,13 +406,15 @@ View(Phenotypes)
 
 ################################################################################################################################
 ################################################################################################################################
+################################################################################################################################
+################################################################################################################################
 
 #Function to create a plot for each phenotype.
 
 pheno<- function(phenoname){
-  
-  
-  # Retrieve all phenotype names, match  'phenoname' to the mp.description  
+    
+
+# Retrieve all phenotype names, match  'phenoname' to the mp.description  
   
   x_table<-Phenotypes%>%
     select(mp.description,MP.Term,Mutant.WT.Expression)%>%
@@ -422,17 +428,20 @@ pheno<- function(phenoname){
   
   names(x_table)[names(x_table)=="n"] <- "Frequency"
   
+  
 
+  # A graphical representation of the data
+  
   library(ggplot2)
   library(ggthemes)
   
   
-  dev.new(width=40, height=20) # to open in a new window
+  #dev.new(width=40, height=20) # to open in a new window
   
   phenoname_p<-ggplot(data=x_table
-                      , aes(x= x_table$MP.Term
-                            ,y=x_table$Percentage, fill=x_table$Mutant.WT.Expression))
-  
+                   , aes(x= x_table$MP.Term
+                         ,y=x_table$Percentage, fill=x_table$Mutant.WT.Expression))
+
   phenoname_2<-  gsub("/", "-", phenoname , fixed = TRUE)
   
   phenoname_p %>%
@@ -455,15 +464,454 @@ pheno<- function(phenoname){
     +geom_text(aes(label=paste0(round(x_table$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
     
     + coord_flip() %>%
-    + ggsave(filename=paste(phenoname_2,".png",sep=" "), limitsize = TRUE)
+    + ggsave(filename=paste("./Plots/Phenotypes/",phenoname_2,".png",sep=" "), limitsize = TRUE)
   
 }    
-
-
-################################################################################################################################
-################################################################################################################################
+    ################################################################################################################################
+    ################################################################################################################################
 
 # Use the function for each phenotype
 
 
-pheno("vision/eye phenotype")
+#pheno("vision/eye phenotype")
+
+
+#apply(all_pheno,1,pheno)
+
+
+
+
+
+
+###############################################################################################################################
+################################################################################################################################
+
+# create graphs for each tissue (EMAPA.TERM) with the gene id --MGI-ID
+
+
+Tissue_freq_Perc<-mgi.genepheno.tissue.ts28_wt_mutant %>%
+  dplyr::group_by(EMAPA.ID,EMAPA.Term,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+
+names(Tissue_freq_Perc)[names(Tissue_freq_Perc)=="n"] <- "Frequency"
+
+View(Tissue_freq_Perc)
+
+
+#All tissues 
+
+dev.new(width=40, height=20) # to open in a new window
+
+Tissue_p<-ggplot(data=Tissue_freq_Perc
+                     , aes(x= Tissue_freq_Perc$EMAPA.Term
+                           ,y=Tissue_freq_Perc$Percentage , fill=Tissue_freq_Perc$Mutant.WT.Expression))
+Tissue_p %>%
+  
+  + labs(x= "Tissue", y="Frequency of the Expression Profile", title= "The Gene Expression Profiles for Mutant and Wild-Type Mice Found in Different Tissues.",
+         tag="E",
+         caption = "The data shows the concordant gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.") %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  +geom_text(aes(label=paste0(round(Tissue_freq_Perc$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  
+  + coord_flip()
+
+
+
+
+###############################################################################################################################
+################################################################################################################################
+
+# All tissues
+
+all_tissues<- mgi.genepheno.tissue.ts28_wt_mutant %>%
+  select(EMAPA.Term)%>%
+  distinct(EMAPA.Term)
+
+#all_tissues <- split(all_tissues, seq(nrow))
+
+
+View(all_tissues)
+
+#Each tissue and their expression percentage
+
+
+tissue_table<-Tissue_freq_Perc%>%
+  select(EMAPA.ID,EMAPA.Term,Mutant.WT.Expression)%>%
+  filter(EMAPA.Term== "brain" )%>%
+  
+  dplyr::group_by(EMAPA.ID,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100) %>%
+  
+  distinct(EMAPA.ID,Mutant.WT.Expression, Percentage, n)
+
+names(tissue_table)[names(tissue_table)=="n"] <- "Frequency"
+
+View(tissue_table)
+
+
+
+# Plot for each tissue:
+
+dev.new(width=40, height=20) # to open in a new window
+
+
+Tissue_plot<-ggplot(data=tissue_table
+                    , aes(x= tissue_table$EMAPA.ID
+                          ,y=tissue_table$Percentage, fill=tissue_table$Mutant.WT.Expression))
+
+
+Tissue_plot %>%
+  
+  + labs(x= "Gene ID", y="Frequency of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice: '),
+         tag= "brain",  #paste(phenoname),
+         caption = paste("The data shows the gene expression profiles found in brain in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+          text = element_text(size=10),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  
+  +geom_text(aes(label=paste0(round(tissue_table$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip() 
+  
+  #+ ggsave(filename=paste("./Plots/",phenoname_2,".png",sep=" "), limitsize = TRUE)
+
+   
+
+
+###############################################################################################################################
+################################################################################################################################
+# # 
+#Function to create a plot for each phenotype.
+
+Tissue<- function(tissuename){
+  
+  
+  tissue_table<-Tissue_freq_Perc%>%
+    select(EMAPA.ID,EMAPA.Term,Mutant.WT.Expression)%>%
+    filter(EMAPA.Term== tissuename)%>%
+    
+    dplyr::group_by(EMAPA.ID,Mutant.WT.Expression) %>%
+    dplyr::summarise(n=n()) %>%
+    dplyr::mutate(Percentage = n/sum(n)*100) %>%
+    
+    distinct(EMAPA.ID,Mutant.WT.Expression, Percentage, n)
+  
+  names(tissue_table)[names(tissue_table)=="n"] <- "Frequency"
+  
+  View(tissue_table)
+  
+  library(ggplot2)
+  library(ggthemes)
+  
+  
+  #dev.new(width=40, height=20) # to open in a new window
+  
+  tissue_p <-ggplot(data=tissue_table
+                      , aes(x= tissue_table$EMAPA.ID
+                            ,y=tissue_table$Percentage, fill=tissue_table$Mutant.WT.Expression))
+  
+  
+  tissue_p %>%
+    
+    + labs(x= "Gene ID", y="Frequency of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice: ', tissuename),
+           tag= paste(tissuename),
+           caption = paste("The data shows the gene expression profiles found in", tissuename ,"in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+    
+    + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+    + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+            text = element_text(size=10),
+            legend.position = "bottom",legend.direction = "horizontal",
+            legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+            axis.text.x = element_text(angle = 90, hjust = 1),
+            panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+    +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+    + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+    
+    
+    +geom_text(aes(label=paste0(round(tissue_table$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+    
+    + coord_flip() %>%
+    + ggsave(filename=paste("./Plots/Tissue/",tissuename,".png",sep=" "), limitsize = TRUE)
+  
+}   
+
+Tissue("brain")
+
+
+
+
+###############################################################################################################################
+################################################################################################################################
+
+#Loop through all tissues 
+
+
+apply(all_tissues,1,Tissue)
+
+
+###############################################################################################################################
+################################################################################################################################
+
+
+
+## Top level phenotype with Discordant expression at 100% and then <100% 
+
+
+Discordant_expression <-filter(mgi.genepheno.tissue.ts28_wt_mutant,  Mutant.WT.Expression == "Yes-No" | Mutant.WT.Expression == "No-Yes") 
+
+
+Discordant_expression_freq<-Discordant_expression %>%
+  select(MP.Term,mp.description, Mutant.WT.Expression)%>%
+  dplyr::group_by(mp.description,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+names(Discordant_expression_freq)[names(Discordant_expression_freq)=="n"] <- "Frequency"
+
+View(Discordant_expression_freq)
+
+
+# Filter for Full Discordance (100%)
+
+Discordant_expression_hundred <-filter(Discordant_expression_freq,  Percentage == 100.00) 
+
+View(Discordant_expression_hundred)
+
+
+
+## Plot graph
+
+
+library(ggplot2)
+library(ggthemes)
+
+
+dev.new(width=40, height=20) # to open in a new window
+
+
+Discordant_expression_hundred_p <-ggplot(data=Discordant_expression_hundred
+                  , aes(x= Discordant_expression_hundred$mp.description
+                        ,y=Discordant_expression_hundred$Percentage, fill=Discordant_expression_hundred$Mutant.WT.Expression))
+
+
+Discordant_expression_hundred_p %>%
+  
+  + labs(x= "Top Level Phenotype", y="Percentage (%) of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice with 100% Discordance.'),
+         tag= "F",
+         caption = paste("The data shows the gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+          text = element_text(size=10),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  
+  +geom_text(aes(label=paste0(round(Discordant_expression_hundred$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip() 
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+
+## Mp.term instead of top level phenotype
+
+
+Discordant_expression_mpterm <-filter(mgi.genepheno.tissue.ts28_wt_mutant,  Mutant.WT.Expression == "Yes-No" | Mutant.WT.Expression == "No-Yes") 
+
+
+Discordant_expression_mpterm<-Discordant_expression_mpterm %>%
+  select(MP.Term,mp.description, Mutant.WT.Expression)%>%
+  dplyr::group_by(MP.Term,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+names(Discordant_expression_mpterm)[names(Discordant_expression_mpterm)=="n"] <- "Frequency"
+
+View(Discordant_expression_mpterm)
+
+
+# Full Discordance (100%)
+
+Discordant_expression_hundred_mpterm <-filter(Discordant_expression_mpterm,  Percentage == 100.00) 
+
+View(Discordant_expression_hundred_mpterm)
+
+
+
+Discordant_expression_hundred_Mp.term_p <-ggplot(data=Discordant_expression_hundred_mpterm
+                                         , aes(x= Discordant_expression_hundred_mpterm$MP.Term
+                                               ,y=Discordant_expression_hundred_mpterm$Percentage, fill=Discordant_expression_hundred_mpterm$Mutant.WT.Expression))
+
+
+Discordant_expression_hundred_Mp.term_p %>%
+  
+  + labs(x= "Top Level Phenotype", y="Percentage (%) of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice.'),
+         tag= "H",
+         caption = paste("The data shows the gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+          text = element_text(size=10),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  
+  +geom_text(aes(label=paste0(round(Discordant_expression_hundred_mpterm$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip() 
+
+
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+# Less than 100% discordance using mp.description
+
+Discordant_expression_less_hundred <-filter(Discordant_expression_freq,  Percentage < 100.00) 
+
+View(Discordant_expression_less_hundred)
+
+
+## Plot 
+
+library(ggplot2)
+library(ggthemes)
+
+
+dev.new(width=60, height=30) # to open in a new window
+
+
+Discordant_expression_less_hundred_p <-ggplot(data=Discordant_expression_less_hundred
+                                         , aes(x= Discordant_expression_less_hundred$mp.description
+                                               ,y=Discordant_expression_less_hundred$Percentage, fill=Discordant_expression_less_hundred$Mutant.WT.Expression))
+
+
+Discordant_expression_less_hundred_p %>%
+  
+  + labs(x= "Top Level Phenotype", y="Percentage (%) of the Expression Profile", title= paste('The Gene Expression Profiles for Mutant and Wild-Type Mice with <100 Discordance.'),
+         tag= "G",
+         caption = paste("The data shows the gene expression profiles found in either mutant or wild-type mice and the percentage (%) of frequency.")) %>%
+  
+  + guides(fill=guide_legend(title="Keys (Mutant-WT):  ")) %>%
+  + theme(plot.caption=element_text(face = "italic", size=10, hjust = 0),
+          text = element_text(size=10),
+          legend.position = "bottom",legend.direction = "horizontal",
+          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+          axis.text.x = element_text(angle = 90, hjust = 1),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +scale_fill_manual("Key (Mutant-WT):  ", values = c("No-No" = "coral2", "No-Yes" = "slateblue1", "Yes-No" = "lightgreen", "Yes-Yes"="plum1"))%>%
+  + geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  
+  
+  +geom_text(aes(label=paste0(round(Discordant_expression_less_hundred$Percentage,1),"%")),size = 2, position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip() 
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+
+## Discordant Expression using the MP.TERM
+
+
+
+Discordant_expression_mp.term <-filter(mgi.genepheno.tissue.ts28_wt_mutant,  Mutant.WT.Expression == "Yes-No" | Mutant.WT.Expression == "No-Yes") 
+
+
+Discordant_expression_mp.term<-Discordant_expression_mp.term %>%
+  select(MP.Term, Mutant.WT.Expression)%>%
+  dplyr::group_by(MP.Term,Mutant.WT.Expression) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+
+names(Discordant_expression_mp.term)[names(Discordant_expression_mp.term)=="n"] <- "Frequency"
+
+View(Discordant_expression_mp.term)
+Discordant_expression_mp.term <-filter(Discordant_expression_mp.term,  Percentage < 100.00) 
+
+View(Discordant_expression_mp.term)
+
+
+####  NO MP.TERM WITH LESS THAN 100% DISCORDANCE FOUND
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+### Add the frequency percentage of tissues (EMAPA.TERM) with the mp. descriptions and MGID
+
+
+# Create table with the EMAPA.term (tissue), MGI.ID (gene), mp.description (top level) and gene expression
+
+expression_gene<-mgi.genepheno.tissue.ts28_wt_mutant %>%
+  select(EMAPA.Term,MGI.ID,mp.description, Mutant.WT.Expression)%>%
+  distinct(EMAPA.Term,MGI.ID,mp.description, Mutant.WT.Expression)            #making sure there are no duplicates
+  
+
+View(expression_gene)
+
+
+# Calculating the frequencies and percentage of gene expression for tissues
+
+expression_genes2<- expression_gene %>%
+  dplyr::group_by(EMAPA.Term,Mutant.WT.Expression) %>%           
+  dplyr::summarise(n=n()) %>%
+  dplyr::mutate(Percentage = n/sum(n)*100)
+  
+
+# To join the two tables
+
+expression_genes2 <- left_join(expression_genes2, expression_gene, by=c("EMAPA.Term" = "EMAPA.Term", "Mutant.WT.Expression" = "Mutant.WT.Expression") )
+
+expression_genes2 %>%
+  select(EMAPA.Term,MGI.ID,mp.description, Mutant.WT.Expression, n, Percentage)%>%
+  distinct(EMAPA.Term,MGI.ID,mp.description, Mutant.WT.Expression, n, Percentage)     #making sure there are no duplicates
+  
+View(expression_genes2)
+
+
+
+################################################################################################################################
+################################################################################################################################
+
+
+
