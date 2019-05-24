@@ -2057,16 +2057,15 @@ all_disease_genes_pheno_Tissues<-all_disease_genes_pheno_Tissues%>%
 #######~~~~~~~~~~~~~~~TRY 2~~~~~~~~~~~~~~~~~~~#
 
 
-#THRESHOLD DATAFRAME WITH THE GENE EXPRESSIONS
 
-#View(human_genes_TPM_greater0_pheno)
+#RETRIEVE THE TOTAL NUMBER OF GENES THAT HAVE A LINKED AND NOT LINKED PHENOTYPE TO GET A LIST OF GENES FOR THE FOR LOOP
 
-
-pheno_cleaned <- human_genes_TPM_greater0_pheno %>% 
+#### This is to cretae a list of genes that can be used to iterate through the 'For loop'
+Pheno_cleaned <- all_disease_genes_pheno %>% 
   gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
   select(HGNC.ID,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
   distinct()
-View(pheno_cleaned)
+#View(Pheno_cleaned)
 
 # merge the tissues with their hpo.descp using the gtex file 
 
@@ -2082,7 +2081,7 @@ GTEX.Tissues.to.tissues<-GTEX.Tissues.to.HPO%>%
 
 # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
 
-pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned, 
+Pheno_Cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, Pheno_cleaned, 
                              by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
 
 #View(pheno_cleaned_Tissues)
@@ -2091,51 +2090,409 @@ pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned,
 # The human_genes_TPM_greater0_pheno_count and GTEX.Tissues.to.HPO joind to get the HPO.superclass.description for each tissue
 
 
-######!!!!!!!!!!!! HERE I KEPT THE TWO COLUMNS WITH THE HPO.SUPERCLASS THAT IS LINKED TO THE GTEX TISSUE, AND THE HPO.DESC WHICH IS THE PHENOTYPE THE GENE IS ASSOCIATED WITH
-
-
-pheno_cleaned_Tissues<-inner_join(GTEX.Tissues.to.HPO,pheno_cleaned_Tissues)
-pheno_cleaned_Tissues<-pheno_cleaned_Tissues%>%
+Pheno_Cleaned_Tissues_GTEX<-inner_join(GTEX.Tissues.to.HPO,Pheno_Cleaned_Tissues)
+Pheno_Cleaned_Tissues_GTEX<-Pheno_Cleaned_Tissues_GTEX%>%
   select_all()%>%
   drop_na()%>%    # the NAs are dropped
   distinct(GTEX.tissues,hpo.description,HGNC.ID,HPO.superclass.description,Expression ) # duplicates are removed that are not needed
 
-View(pheno_cleaned_Tissues)
+#View(Pheno_Cleaned_Tissues_GTEX)
 
 ###
 
-# COUNT THE NUMBER OF GENES EXPRESSED
 
-pheno_cleaned_Tissues_COUNT<-pheno_cleaned_Tissues%>%
-  dplyr::group_by(HPO.superclass.description,Expression) %>%  # group by gene here 
-  dplyr::mutate(n=n()) %>%     #mutate keeps the other columns
-  mutate(freq= n /sum(as.numeric(n)))%>%
-  distinct(HGNC.ID,HPO.superclass.description,Expression, n, freq ) # duplicates are removed that are not needed
+# Genes that are Linked to HPO.Description
 
-  
-#View(pheno_cleaned_Tissues_COUNT)
-
-# 
-# pheno_cleaned_Tissues_COUNT_hpo.super<-merge(pheno_cleaned_Tissues, pheno_cleaned_Tissues_COUNT, 
-#                              by = c("HGNC.ID", "HGNC.ID"), all.x = TRUE)
+Linked.HPO.desc<-Pheno_Cleaned_Tissues_GTEX%>%
+  select(hpo.description,HGNC.ID)%>%
+  distinct()
 
 
-pheno_cleaned_Tissues_COUNT_hpo.super<-pheno_cleaned_Tissues_COUNT_hpo.super%>%
-  select(HGNC.ID, HPO.superclass.description,Expression, freq,n )%>% # duplicates are removed that are not needed
+#View(Linked.HPO.desc)
+
+# Remove HPO.Description to get the genes that ARE NOT HPO.DESC LINKED AND HAVE GENE EXPRESSION IN OTHER TISSUES
+
+Pheno_Cleaned_Tissues_GTEX<-Pheno_Cleaned_Tissues_GTEX%>%
+  select(GTEX.tissues,HGNC.ID,HPO.superclass.description,Expression)%>%
+  distinct()
+
+#View(Pheno_Cleaned_Tissues_GTEX)
+
+
+# Keep rows that do NOT have the same "HPO.superclass.description"="hpo.description", to find the phenos that are not linked
+NonLinked_PHENO<-anti_join(Pheno_Cleaned_Tissues_GTEX,Linked.HPO.desc, by=c("HGNC.ID"="HGNC.ID","HPO.superclass.description"="hpo.description")) # keep rows with matching ID
+
+
+
+# Keep rows that ARE the same (NOTE THERE MAY BE SOME GENES THAT DID NOT HAVE AN OBSERVED PHENOTYPE BUT HAD A LINKED HPO.DESC THEREFORE THEY MAY HAVE NAS)
+Linked_PHENO<-right_join(Pheno_Cleaned_Tissues_GTEX,Linked.HPO.desc, by=c("HGNC.ID"="HGNC.ID","HPO.superclass.description"="hpo.description")) # keep rows with matching ID
+
+# Remove NAs, genes that have linked  expression but no tissues or expression linked 
+
+Linked_PHENO<-Linked_PHENO%>%
+  select_all()%>%
   drop_na()%>%
   distinct()
+
+
+
+#View(Linked_PHENO)
+
+
+# KEEP GENES THAT HAVE BOTH LINKED AND NON-LINKED 
+
+NonLinked_PHENO<-semi_join(NonLinked_PHENO,Linked_PHENO, by=c("HGNC.ID"="HGNC.ID")) # keep rows with matching ID
+
+#View(NonLinked_PHENO)
+# COUNT the number of tissues 
+
+#change expression to factor
+
+NonLinked_PHENO$Expression <- as.factor(NonLinked_PHENO$Expression)
+
+Linked_PHENO$Expression <- as.factor(Linked_PHENO$Expression)
+
+
+#Remove GTEX.TISSUEs To prevent duplication of  the gene
+
+Linked_PHENO_HGNC<-ungroup(Linked_PHENO)%>%
+  select(HGNC.ID, -GTEX.tissues)%>%
+  dplyr::distinct()
+
+all_genes2<-right_join(Linked_PHENO_HGNC, NonLinked_PHENO)
+all_genes2<-all_genes2%>%
+  select(HGNC.ID)%>%
+  distinct()
+
+View(all_genes2)
+
+
+
+
+
+####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
+
+#################~~~~~~~~~~~~~~~~~~~~~~~~~~~~~THE GENE FUNCTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#################################
+
+
+
+Gene_FISHER_TEST<-function(df, Gene){  
+
+
+  
+  #THRESHOLD DATAFRAME WITH THE GENE EXPRESSIONS
+  
+  #View(human_genes_TPM_greater0_pheno)
+  
+  
+  pheno_cleaned <- df %>% 
+    gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
+    select(HGNC.ID,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
+    distinct()
+
+  # merge the tissues with their hpo.descp using the gtex file 
+  
+  
+  # USE THE GTEX TISSUES TO GET THE HPO.DESCP-TISSUE RELATIONSHIP CORRECTED
+  
+  GTEX.Tissues.to.tissues<-GTEX.Tissues.to.HPO%>%
+    select_all()%>%
+    drop_na()%>%
+    select(GTEX.tissues)
+  
+  ## There are some tissues that are found in different HPO.superclass.description tehrefore have been duplicated in the GTEX.Tissues.to.tissues
+  
+  # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
+  
+  pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned, 
+                               by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
+  
+  #View(pheno_cleaned_Tissues)
+  
+  
+  # The human_genes_TPM_greater0_pheno_count and GTEX.Tissues.to.HPO joind to get the HPO.superclass.description for each tissue
+  
+  
+  ######!!!!!!!!!!!! HERE I KEPT THE TWO COLUMNS WITH THE HPO.SUPERCLASS THAT IS LINKED TO THE GTEX TISSUE, AND THE HPO.DESC WHICH IS THE PHENOTYPE THE GENE IS ASSOCIATED WITH
+  
+  
+  pheno_cleaned_Tissues<-inner_join(GTEX.Tissues.to.HPO,pheno_cleaned_Tissues)
+  pheno_cleaned_Tissues<-pheno_cleaned_Tissues%>%
+    select_all()%>%
+    drop_na()%>%    # the NAs are dropped
+    distinct(GTEX.tissues,hpo.description,HGNC.ID,HPO.superclass.description,Expression ) # duplicates are removed that are not needed
   
 
-#change the name of EXPRESSION.Y to Expression
-names(pheno_cleaned_Tissues_COUNT_hpo.super)[names(pheno_cleaned_Tissues_COUNT_hpo.super) == 'Expression.y'] <- 'Expression'
+  
+  # Genes that are Linked to HPO.Description
+  
+  linked.hpo.desc<-pheno_cleaned_Tissues%>%
+    select(hpo.description,HGNC.ID)%>%
+    distinct()
+  
+  
+
+  #clean the pheno_cleaned_Tissues by removing the hpo.description that are linked to the gene
+  
+  pheno_cleaned_Tissues_<-pheno_cleaned_Tissues%>%
+    select(GTEX.tissues,HGNC.ID,HPO.superclass.description,Expression)%>%
+    distinct()
+  
+
+  # Keep rows that do NOT have the same "HPO.superclass.description"="hpo.description", to find the phenos
+  #that are not linked
+  
+  nonlinked_PHENO<-anti_join(pheno_cleaned_Tissues_,linked.hpo.desc, by=c("HGNC.ID"="HGNC.ID","HPO.superclass.description"="hpo.description")) # keep rows with matching ID
+  
+  
+  # Keep rows that ARE the same (NOTE THERE MAY BE SOME GENES THAT DID NOT HAVE AN OBSERVED PHENOTYPE 
+  #BUT HAD A LINKED HPO.DESC THEREFORE THEY MAY HAVE NAS)
+  linked_PHENO<-right_join(pheno_cleaned_Tissues_,linked.hpo.desc, by=c("HGNC.ID"="HGNC.ID","HPO.superclass.description"="hpo.description")) # keep rows with matching ID
+  
+  # Remove NAs, genes that have linked  expression but no tissues or expression linked 
+  
+  linked_PHENO<-linked_PHENO%>%
+    select_all()%>%
+    drop_na()%>%
+    distinct()
+  
+  #View(linked_PHENO)
+  
+  # KEEP GENES THAT HAVE BOTH LINKED AND NON-LINKED 
+  
+  nonlinked_PHENO<-semi_join(nonlinked_PHENO,linked_PHENO, by=c("HGNC.ID"="HGNC.ID")) # keep rows with matching ID
+  
+  # CHANGE EXPRESSION TO FACTOR SO THAT THE .drop=FALSE can be used for genes that only have Yes or No
+  nonlinked_PHENO$Expression <- as.factor(nonlinked_PHENO$Expression)
+  
+  linked_PHENO$Expression <- as.factor(linked_PHENO$Expression)
+
+  
+  linked_PHENO_COUNT2<-linked_PHENO%>%
+    dplyr::select(GTEX.tissues,HGNC.ID, Expression)%>%
+    dplyr::distinct()
+  
+  linked_PHENO_COUNT3<-linked_PHENO_COUNT2%>%
+    dplyr::select_all()%>%
+    dplyr::group_by(HGNC.ID, GTEX.tissues,Expression,.drop = FALSE) %>%  # group by gene here 
+    dplyr::summarise(Count=n()) %>%     #mutate keeps the other columns
+    drop_na()%>%
+    dplyr::distinct(HGNC.ID,GTEX.tissues,Expression,Count ) 
+  
+  #View(linked_PHENO_COUNT3)
+  
+  nonlinked_PHENO_COUNT2<-nonlinked_PHENO%>%
+    dplyr::select(GTEX.tissues,HGNC.ID, Expression)%>%
+    dplyr::distinct()
+  
+#  View(nonlinked_PHENO_COUNT2)
+  
+  nonlinked_PHENO_COUNT3<-nonlinked_PHENO_COUNT2%>%
+    dplyr::select_all()%>%
+    dplyr::group_by(HGNC.ID, GTEX.tissues,Expression,.drop = FALSE) %>%  # group by gene here 
+    dplyr::summarise(Count=n()) %>%     #mutate keeps the other columns
+    drop_na()%>%
+    dplyr::distinct(HGNC.ID,GTEX.tissues,Expression,Count ) 
+  
+
+  
+  All__genes<-ungroup(nonlinked_PHENO_COUNT3)%>%   #gtex.tissue was being grouped with the hgnc.id so i removed the grouping
+    select(HGNC.ID, -GTEX.tissues)%>%
+    distinct()
+
+  
+  All__genes2<-ungroup(linked_PHENO_COUNT3)%>%
+    select(HGNC.ID, -GTEX.tissues)%>%
+    distinct()
+  
+  all__genes<-right_join(All__genes, All__genes2)
+  
+  #CHANGE THE DF SO THAT WE HAVE YES AND NO AS COLUMNS
+  
+  nonlinked_PHENO_COUNT_spread<-nonlinked_PHENO_COUNT3 %>%
+    spread(Expression,Count)%>%
+    dplyr::distinct()
+
+  linked_PHENO_Count_spread<-linked_PHENO_COUNT3 %>%
+    spread(Expression,Count)%>%
+    dplyr::distinct()
+  
+
+  #Filter gene
+  
+  linked_PHENO_Count_GENESPECIFIC<-linked_PHENO_Count_spread%>%
+    dplyr::select_all()%>%
+    dplyr::filter(HGNC.ID == Gene )%>%
+    dplyr::distinct() # duplicates are removed that are not needed
+  
+    
+
+  nonlinked_PHENO_COUNT_GENESPECIFIC<-nonlinked_PHENO_COUNT_spread%>%
+    dplyr::select_all()%>%
+    dplyr::filter(HGNC.ID == Gene )%>%
+    dplyr::distinct() # duplicates are removed that are not needed
+  
+  
+  # 
+  nonlinked_PHENO_COUNT_GENESPECIFIC_SUM<-nonlinked_PHENO_COUNT_GENESPECIFIC%>%
+    group_by(HGNC.ID)%>%
+    summarise_at(c("No","Yes"),sum) %>% #sums the columns
+    mutate(Phenotype="Not Linked Phenotype Observed")%>%
+    distinct()
+  
+
+  
+  
+  linked_PHENO_Count_GENESPECIFIC_SUM<-linked_PHENO_Count_GENESPECIFIC%>%
+    group_by(HGNC.ID)%>%
+    summarise_at(c("No","Yes"),sum) %>% #sums the columns
+    mutate(Phenotype="Linked Phenotype Observed")%>%
+    distinct()
+  
+  
+
+  
+  # Bind the two datfarames to create a matrix
+  Linked_NON_LINKED_PHENO<-rbind(linked_PHENO_Count_GENESPECIFIC_SUM,nonlinked_PHENO_COUNT_GENESPECIFIC_SUM)
+  
+  #View(Linked_NON_LINKED_PHENO)
+  
+  #define the rownames 
+  library(magrittr)
+  Linked_NON_LINKED_PHENO<-Linked_NON_LINKED_PHENO %>%
+    set_rownames(.$Phenotype) %>% 
+    select(-HGNC.ID, -Phenotype)
+  
+  
+  #View(Linked_NON_LINKED_PHENO)
+  
+  
+  # perform Fisher test
+  
+  GENEPVals<-fisher.test(Linked_NON_LINKED_PHENO,alternative = "two.sided" )  # THIS WORKED
+  
+  GENEPVALUES<-GENEPVals$p.value
+  
+  return(GENEPVALUES)
+  
+  
+  }
 
 
-# CHANGE THEM INTO FACTORS
-pheno_cleaned_Tissues_COUNT_hpo.super$Expression <- as.factor(pheno_cleaned_Tissues_COUNT_hpo.super$Expression)
-pheno_cleaned_Tissues_COUNT_hpo.super$HPO.superclass.description <- as.factor(pheno_cleaned_Tissues_COUNT_hpo.super$HPO.superclass.description)
-pheno_cleaned_Tissues_COUNT_hpo.super$HGNC.ID <- as.factor(pheno_cleaned_Tissues_COUNT_hpo.super$HGNC.ID)
+Gene_FISHER_TEST(df=human_genes_TPM_greater0_pheno, Gene="HGNC:1020")  
+  
 
-#View(pheno_cleaned_Tissues_COUNT_hpo.super)
+###########~~~~~~~~~~~~~~~~USE OF FOR-LOOP ~~~~~#
+
+#THE FOR LOOP ITERATES THROUGH THE all_disease_genes_pheno_Tissues DATAFRAME WHICH HAS ALL TISSUES AND HPO.DESC(TOPLEVEL)
+
+# CREATE A data frame with two columns and 55 rows, WHICH HAS THE TISSUE NAMES, HPO.SUPERCLASS AND AN EMPTY COLUMN
+View(all_genes2)
+# NO GENE EXPRESSION 
+PVALUE_GENE_Greater0 <- data.frame(all_genes2,
+                                  P.VALUE=vector(length=3678)) 
+
+
+#View(human_genes_TPM_greater0_pheno)
+for(i in 1:nrow(all_genes2)) {
+  ii <- all_genes2[i,1]     #FIRST COLUMN
+  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+
+  
+  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+  
+  PVAL<-Gene_FISHER_TEST(df=human_genes_TPM_greater0_pheno, Gene= paste(ii)) 
+
+  print(PVAL)                  # THE PVALUE IS PRINTED
+  
+  PVALUE_GENE_None$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+  
+  }
+
+write.csv(PVALUE_GENE_Greater0,'./Output_Files/PVALUE_GENE_Greater0.csv')
+  
+
+
+
+
+## No gene expression (Yes is for genes that have a gene expression of 0)
+
+
+PVALUE_GENE_None <- data.frame(all_genes2,
+                               P.VALUE=vector(length=3678)) 
+
+
+#View(human_genes_TPM_greater0_pheno)
+for(i in 1:nrow(all_genes2)) {
+  ii <- all_genes2[i,1]     #FIRST COLUMN
+  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+  
+  
+  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+  
+  PVAL<-Gene_FISHER_TEST(df=human_genes_TPM_None_pheno, Gene= paste(ii)) 
+  
+  print(PVAL)                  # THE PVALUE IS PRINTED
+  
+  PVALUE_GENE_None$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+  
+}
+
+write.csv(PVALUE_GENE_None,'./Output_Files/PVALUE_GENE_None.csv')
+
+
+
+## For gene expression >0.1
+
+
+PVALUE_GENE_0.1 <- data.frame(all_genes2,
+                              P.VALUE=vector(length=3678)) 
+
+for(i in 1:nrow(all_genes2)) {
+  ii <- all_genes2[i,1]     #FIRST COLUMN
+  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+  
+  
+  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+  
+  PVAL<-Gene_FISHER_TEST(df=human_genes_TPM_0.1_pheno, Gene= paste(ii)) 
+  
+  print(PVAL)                  # THE PVALUE IS PRINTED
+  
+  PVALUE_GENE_0.1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+  
+}
+
+write.csv(PVALUE_GENE_0.1,'./Output_Files/PVALUE_GENE_0.1.csv')
+
+
+## For gene expression >1
+
+
+PVALUE_GENE_1 <- data.frame(all_genes2,
+                            P.VALUE=vector(length=3678)) 
+
+
+#View(human_genes_TPM_greater0_pheno)
+for(i in 1:nrow(all_genes2)) {
+  ii <- all_genes2[i,1]     #FIRST COLUMN
+  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+  
+  
+  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+  
+  PVAL<-Gene_FISHER_TEST(df=human_genes_TPM_1_pheno, Gene= paste(ii)) 
+  
+  print(PVAL)                  # THE PVALUE IS PRINTED
+  
+  PVALUE_GENE_1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+  
+}
+
+write.csv(PVALUE_GENE_1,'./Output_Files/PVALUE_GENE_1.csv')
+
+
+
 
 ####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
 
