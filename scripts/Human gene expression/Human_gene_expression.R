@@ -2258,7 +2258,6 @@ Gene_FISHER_TEST<-function(df, Gene){
   
   #View(linked_PHENO)
   
-  
   # KEEP GENES THAT HAVE BOTH LINKED AND NON-LINKED 
   
   nonlinked_PHENO<-semi_join(nonlinked_PHENO,linked_PHENO, by=c("HGNC.ID"="HGNC.ID")) # keep rows with matching ID
