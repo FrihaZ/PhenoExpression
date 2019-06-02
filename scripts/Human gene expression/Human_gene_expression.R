@@ -102,6 +102,7 @@ approved_hgnc.id <- approved_hgnc.id %>%
 
 human_genes <-left_join(human_genes, approved_hgnc.id, by=c("Description" = "Gene.Symbol"))  
 
+## NEW
 ## KEEP THE ENTREZ IDS  FOR GENE ENRICHMENT ANALYSIS
 
 human_genes_with_GENE_ID <-human_genes%>%
