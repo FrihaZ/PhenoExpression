@@ -102,6 +102,15 @@ approved_hgnc.id <- approved_hgnc.id %>%
 
 human_genes <-left_join(human_genes, approved_hgnc.id, by=c("Description" = "Gene.Symbol"))  
 
+## KEEP THE ENTREZ IDS  FOR GENE ENRICHMENT ANALYSIS
+
+human_genes_with_GENE_ID <-human_genes%>%
+  select(HGNC.ID,gene_id, Description, Type,`Adipose - Subcutaneous`:`Whole Blood`)%>% 
+  drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
+  distinct()
+
+View(human_genes_with_GENE_ID)
+
 human_genes <-human_genes%>%
   select(HGNC.ID,gene_id, Description, Type,`Adipose - Subcutaneous`:`Whole Blood`)%>% 
   drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
@@ -1822,204 +1831,10 @@ df_threshold<-function(df, threshold, threshold_2){
 # df_threshold(df=human_genes_TPM_1_pheno , threshold=">/= 1", threshold_2="1")
 # 
 # 
-# 
-# 
-# 
-
-
-
-
-###################################################################################################################################################################
-
-###################################################################################################################################################################
-
-
-####~~~~~~~~ TO COMPARE EACH TISSUE'S NUMBER OF GENES EXPRESSED AGAINST ALL OTHER TISSUES THAT ARE NOT IN THE SAME SYSTEM ~~~~~~~~~~######
-#
-
-# ###~~~~~ THRESHOLD >0 
-# 
-# ##~~ Change the dataframe so that the tissues are all in rows with their expressions
-# 
-# 
-# human_genes_TPM_greater0_pheno_cleaned <- human_genes_TPM_greater0_pheno %>% 
-#   gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
-#   select(`HPO-Term-ID`,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
-#   distinct()
-# 
-# 
-# human_genes_TPM_greater0_pheno_count<-human_genes_TPM_greater0_pheno_cleaned%>%
-#   dplyr::group_by(GTEX.tissues,Expression) %>%
-#   dplyr::summarise(n=n()) 
-# 
-# GTEX.Tissues.to.tissues<-GTEX.Tissues.to.HPO%>%
-#   select_all()%>%
-#   drop_na()%>%
-#   select(GTEX.tissues)
-# 
-# 
-# #View(GTEX.Tissues.to.tissues)
-# ## There are some tissues that are found in different HPO.superclass.description tehrefore have been duplicated in the GTEX.Tissues.to.tissues
-# 
-# # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
-# 
-# human_genes_TPM_greater0_pheno_Tissues<-merge(GTEX.Tissues.to.tissues, human_genes_TPM_greater0_pheno_count, by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
-# 
-# 
-# # The human_genes_TPM_greater0_pheno_count and GTEX.Tissues.to.HPO joind to get the HPO.superclass.description for each tissue
-# 
-# human_genes_TPM_greater0_pheno_Tissues<-inner_join(GTEX.Tissues.to.HPO,human_genes_TPM_greater0_pheno_Tissues)
-# human_genes_TPM_greater0_pheno_Tissues<-human_genes_TPM_greater0_pheno_Tissues%>%
-#   select_all()%>%
-#   drop_na()%>%    # the NAs are dropped
-#   distinct(GTEX.tissues,HPO.id, HPO.superclass.id,HPO.superclass.description,Expression,n ) # duplicates are removed that are not needed
-# 
-# ##View(human_genes_TPM_greater0_pheno_Tissues)
-# 
-# 
-# #View(human_genes_TPM_greater0_pheno_Tissues)
-# 
-# human_genes_TPM_greater0_pheno_Tissues$Expression <- as.factor(human_genes_TPM_greater0_pheno_Tissues$Expression)
-# human_genes_TPM_greater0_pheno_Tissues$GTEX.tissues <- as.factor(human_genes_TPM_greater0_pheno_Tissues$GTEX.tissues)
-# human_genes_TPM_greater0_pheno_Tissues$HPO.superclass.description <- as.factor(human_genes_TPM_greater0_pheno_Tissues$HPO.superclass.description)
-# 
-# human_genes_TPM_greater0_pheno_Tissues$HPO.id <- as.factor(human_genes_TPM_greater0_pheno_Tissues$HPO.id)
-# human_genes_TPM_greater0_pheno_Tissues$HPO.superclass.id <- as.factor(human_genes_TPM_greater0_pheno_Tissues$HPO.superclass.id)
-# 
-# #View(human_genes_TPM_greater0_pheno_Tissues)
-# # 
-# # human_genes_TPM_greater0_pheno_cleaned_wide<-human_genes_TPM_greater0_pheno_Tissues %>%
-# #   spread(Expression,n)%>%
-# #   distinct()
-# 
-# 
-# # #View(human_genes_TPM_greater0_pheno_cleaned_wide)
-# 
-# ####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
-# 
-# 
-# 
-# 
-# greater0_pheno_fischer<-human_genes_TPM_greater0_pheno_Tissues%>%
-#   select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-#   distinct()
-# 
-# 
-# # 
-# # #View(greater0_pheno_fischer)
-# # #View(human_genes_TPM_greater0_tissue_ND)
-# # 
-# 
-# 
-# greater0_pheno_fischer_Adipose_Subcutaneous<-greater0_pheno_fischer%>%
-#   select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-#   filter(HPO.superclass.description !="Abnormality of connective tissue")%>%
-#   filter(GTEX.tissues != "Adipose - Subcutaneous")%>%)%>%
-#   distinct(GTEX.tissues,Expression,n)
-# 
-# # row.names(greater0_pheno_fischer_Adipose_Subcutaneous) <- 1:nrow(greater0_pheno_fischer_Adipose_Subcutaneous)
-# # #greater0_pheno_fischer_Adipose_Subcutaneous<-t(greater0_pheno_fischer_Adipose_Subcutaneous)
-# 
-# 
-# 
-# #changge them into factors
-# greater0_pheno_fischer_Adipose_Subcutaneous$GTEX.tissues <- as.factor(greater0_pheno_fischer_Adipose_Subcutaneous$GTEX.tissues)
-# greater0_pheno_fischer_Adipose_Subcutaneous$Expression <- as.factor(greater0_pheno_fischer_Adipose_Subcutaneous$Expression)
-# str(greater0_pheno_fischer_Adipose_Subcutaneous)
-# 
-# 
-# 
-# 
-# greater0_pheno_fischer_Adipose_Subc<-greater0_pheno_fischer%>%
-#   select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-#   filter(HPO.superclass.description =="Abnormality of connective tissue")%>%
-#   filter(GTEX.tissues == "Adipose - Subcutaneous")%>%
-#   distinct(GTEX.tissues,Expression,n)%>%
-#   spread(Expression,n)%>%
-#   distinct(GTEX.tissues,No, Yes)
-# #View(greater0_pheno_fischer_Adipose_Subc)
-# 
-# 
-# # superclass="Abnormality of connective tissue", 
-# # Tissue="Adipose - Subcutaneous"
-# 
-# ## superclass="Abnormality of the genitourinary system", 
-# # Tissue="Kidney - Cortex"
-# 
-# #All tissues without the Adipose_Subcutaneous
-# 
-# all_tissues<-greater0_pheno_fischer_Adipose_Subcutaneous %>%
-#   spread(Expression,n)%>%
-#   distinct()
-# 
-# #View(all_tissues)
-# 
-# # # trun the factors into numerics
-# # all_tissues$No <- as.numeric(as.character(all_tissues$No))
-# # 
-# # all_tissues$Yes <- as.numeric(as.character(all_tissues$Yes))
-# 
-# 
-# # Sum all of the No and Yes rows to get total 
-# 
-# all_tissues_<-all_tissues%>%
-#   select_all()%>%
-#   summarise_at(c("No","Yes"),sum) %>% #sums the columns
-#   distinct(No, Yes)%>%
-#   mutate(GTEX.tissues="Total")%>%
-#   distinct(GTEX.tissues,No,Yes)
-#   
-#   
-# #View(all_tissues_)
-# 
-# # add name of the row
-# #all_tissues_$GTEX.tissues<- "Total"
-# 
-# #Add column name
-# #colnames(all_tissues_) <- c("No","Yes", "GTEX.tissues")
-# ##View(all_tissues_)
-# 
-# # Bind the two datfarames to create a matrix
-# total_tissue<-rbind(greater0_pheno_fischer_Adipose_Subc,all_tissues_)
-# 
-# 
-# #define the rownames 
-# library(magrittr)
-# total_tissue<-total_tissue %>%
-#   set_rownames(.$GTEX.tissues) %>% 
-#   select(-GTEX.tissues)
-# #View(total_tissue)
-# 
-# #rownames(total_tissue) <- total_tissue$GTEX.tissues
-# # 
-# # # remove GTEX.tissues as it was an extra column
-# # total_tissue<-total_tissue%>%
-# #   select(-GTEX.tissues)
-# 
-# #View(total_tissue)
-# 
-# 
-# # perform Fisher test
-# 
-# pval<-fisher.test(total_tissue,alternative='two.sided')  # THIS WORKED
-# pval
-# 
-# pvalue<-pval$p.value
-# 
-# # create a matrix with all tissue and pvalue
-# p.value.df<-data.frame("Tissue"= c("Adipose - Subcutaneous"),
-#               "HPO.DESCRIPTION"= c("Abnormality of connective tissue"),
-#               p.value=pvalue)
-# 
-# #View(p.value.df)
-# 
-#  
-# # 
-# # superclass="Abnormality of connective tissue", 
-# # Tissue="Adipose - Subcutaneous"
-# 
-# 
-
+###############################################################################################################################################################################
+#############################################################################################################################################################################################
+                               
+                               
 ####~~~~~~~~~~~~~CREATE A DATAFRAME WITH ALL TISSUES AND SUPERCLASSES (HPO.DESC/TOPLEVEL)~~~~~~~~~~~~~~~~~~~~########
 all_disease_genes_pheno_cleaned <- all_disease_genes_pheno %>% 
   gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
@@ -2494,378 +2309,582 @@ write.csv(PVALUE_GENE_1,'./Output_Files/PVALUE_GENE_1.csv')
 
 
 
+
+#######~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ADJUST PVALUE FOR ALL THRESHOLDS~~~~~~~~~~~~~~~~~~~~~~~~~~~#################
+
+
+## Gene Expression >0
+PVALUE_GENE_Greater0<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_None.csv")
+
+PVALUE_GENE_Greater0<-PVALUE_GENE_Greater0%>%
+  select(HGNC.ID, P.VALUE)%>%
+  distinct()
+#View(PVALUE_GENE_Greater0)
+
+## The Benjamini & Hochberg (1995) "BH" was used 
+
+PVALUE_GENE_Greater0$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_Greater0$P.VALUE, method="BH")
+
+View(PVALUE_GENE_Greater0)
+
+
+## Gene Expression =0
+
+
+PVALUE_GENE_None<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_None.csv")
+
+PVALUE_GENE_None<-PVALUE_GENE_None%>%
+  select(HGNC.ID, P.VALUE)%>%
+  distinct()
+#View(PVALUE_GENE_None)
+
+## The Benjamini & Hochberg (1995) "BH" was used 
+
+PVALUE_GENE_None$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_None$P.VALUE, method="BH")
+
+View(PVALUE_GENE_None)
+
+
+
+## Gene Expression >0.1
+
+
+PVALUE_GENE_0.1<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_0.1.csv")
+
+PVALUE_GENE_0.1<-PVALUE_GENE_0.1%>%
+  select(HGNC.ID, P.VALUE)%>%
+  distinct()
+#View(PVALUE_GENE_0.1)
+
+## The Benjamini & Hochberg (1995) "BH" was used 
+
+PVALUE_GENE_0.1$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_0.1$P.VALUE, method="BH")
+
+View(PVALUE_GENE_0.1)
+
+
+
+
+## Gene Expression >1
+
+
+PVALUE_GENE_1<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_1.csv")
+
+PVALUE_GENE_1<-PVALUE_GENE_1%>%
+  select(HGNC.ID, P.VALUE)%>%
+  distinct()
+View(PVALUE_GENE_1)
+
+## The Benjamini & Hochberg (1995) "BH" was used 
+
+PVALUE_GENE_1$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_1$P.VALUE, method="BH")
+
+View(PVALUE_GENE_1)
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PREPARE DATAFRAMES FOR GEA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~############
+
+
+## Get teh Entrez Gene IDs for each gene (From the first dataframe human_gene)
+
+human_genes_with_GENE_ID_<-human_genes_with_GENE_ID%>%
+  select(HGNC.ID, gene_id)%>%
+  distinct()
+
+View(human_genes_with_GENE_ID_)
+
+
+## >0 
+
+PVALUE_GENE_Greater0_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_Greater0, by=c("HGNC.ID" ="HGNC.ID" ) )
+
+
+PVALUE_GENE_Greater0_entrez<-PVALUE_GENE_Greater0_entrez%>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  distinct()
+
+View(PVALUE_GENE_Greater0_entrez)
+
+
+# Filter <0.05
+
+Greater0.test.set<- PVALUE_GENE_Greater0_entrez %>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  filter(Adjusted.Pvalue <= 0.05)%>%
+  distinct(gene_id, Adjusted.Pvalue)
+
+View(Greater0.test.set)
+
+## No gene expression
+
+PVALUE_GENE_None_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_None, by=c("HGNC.ID" ="HGNC.ID" ) )
+
+
+PVALUE_GENE_None_entrez<-PVALUE_GENE_None_entrez%>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  distinct()
+View(PVALUE_GENE_None_entrez)
+
+
+# Filter <0.05
+
+None.test.set<- PVALUE_GENE_None_entrez %>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  filter(Adjusted.Pvalue <= 0.05)%>%
+  distinct(gene_id, Adjusted.Pvalue)
+
+View(None.test.set)
+
+## >=/= 0.1 expression
+
+PVALUE_GENE_0.1_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_0.1, by=c("HGNC.ID" ="HGNC.ID" ) )
+
+
+PVALUE_GENE_0.1_entrez<-PVALUE_GENE_0.1_entrez%>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  distinct()
+View(PVALUE_GENE_None_entrez)
+
+
+# Filter <0.05
+
+test.set_0.1<- PVALUE_GENE_0.1_entrez %>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  filter(Adjusted.Pvalue <= 0.05)%>%
+  distinct(gene_id, Adjusted.Pvalue)
+
+View(test.set_0.1)
+
+
+
+## >=/= 1 expression
+
+PVALUE_GENE_1_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_1, by=c("HGNC.ID" ="HGNC.ID" ) )
+
+
+PVALUE_GENE_1_entrez<-PVALUE_GENE_1_entrez%>%
+  select(gene_id, Adjusted.Pvalue)%>%
+  distinct()
+
+# remove "." from the entrez gene ids
+
+t<-t(data.frame(strsplit(PVALUE_GENE_1_entrez$gene_id, ".", fixed = TRUE)))
+View(t)
+t<-data.frame(t)
+PVALUE_GENE_1_entrez$GENE_SPLIT<-t$X1
+view(PVALUE_GENE_1_entrez)
+
+
+# Keep only the gene ids that don't have a "." with the pvalue
+
+
+PVALUE_GENE_1_entrez<-PVALUE_GENE_1_entrez%>%
+  select(GENE_SPLIT, Adjusted.Pvalue)%>%
+  distinct()
+
+
+# Make the dataframe into a vector
+
+PVALUE_GENE_1_entrez<-as.vector(PVALUE_GENE_1_entrez)
+
+View(PVALUE_GENE_1_entrez)
+
+# Filter <0.05
+
+
+test.set_1<- PVALUE_GENE_1_entrez %>%
+  select(GENE_SPLIT, Adjusted.Pvalue)%>%
+  filter(Adjusted.Pvalue <= 0.05)%>%
+  distinct(GENE_SPLIT, Adjusted.Pvalue)
+
+
+
+# Make the dataframe into a vector
+
+
+test.set_1<-as.vector(test.set_1)
+
+View(test.set_1)
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GENE ENRICHMENT ANALYSIS ~~~~~~~~~~~~~~~~~~~~~~~~~#####
+
+## GO annotations and enrichment ################################################################################################
+
+# # 
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("org.Hs.eg.db")
+# # 
+# source("https://bioconductor.org/biocLite.R") 
+# biocLite("multtest") 
+
+library(org.Hs.eg.db);library(GOstats);library(multtest); library(GO.db)
+# 
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# BiocManager::install("multtest")
+
+
+
+go.enrichment <- function(test.set,reference.set,ontology.type ="BP",label=NULL) {
+  
+  
+  
+  GO.param <- new("GOHyperGParams",
+                  
+                  geneIds = test.set,
+                  
+                  universeGeneIds = reference.set,
+                  
+                  ontology = ontology.type,
+                  
+                  annotation = "org.Hs.eg.db",
+                  
+                  testDirection = "over",
+                  
+                  pvalueCutoff = 1,
+                  
+                  conditional = T)
+  
+  
+  
+  GO.sign.results <- as.data.frame(summary(hyperGTest(GO.param))) %>%
+    
+    mutate (Pvalue.BH = p.adjust(Pvalue,method="BH")) %>%
+    
+    filter(Pvalue.BH < 0.05) %>%
+    
+    dplyr::select(1,3:7,2,8)
+  
+  
+  
+  
+  
+  if(missing(label)) {
+    
+    
+    
+    return(GO.sign.results)
+    
+    
+    
+  } else {
+    
+    
+    
+    return(GO.sign.results %>%
+             
+             mutate(Category = label))
+    
+    
+    
+  }
+  
+  
+  
+}
+
+
+
+
+enr_BP<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="BP",label=NULL)
+
+enr_CC<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="CC",label=NULL)
+
+enr_MF<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="MF",label=NULL)
+
+View(enr_BP)
+View(enr_CC)
+View(enr_MF)
+                               
+                               
+                               
+#################################################################################################################################################
+                            ######## OLD TISSUE #######
+#######################################################################################################################################################                               
 ####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
 
 
 
-
-greater0_pheno_fischer<-pheno_cleaned_Tissues_COUNT_hpo.super%>%
-  select(HGNC.ID,GTEX.tissues, HPO.superclass.description,Expression,n, freq)%>%
-  distinct()
-
-greater0_pheno_fischer_NO_TISSUE<-greater0_pheno_fischer%>%
-  select(HGNC.ID,GTEX.tissues,HPO.superclass.description,Expression,n,freq)%>%
-  filter(HPO.superclass.description != "Abnormality of the genitourinary system" )%>%
-  filter(GTEX.tissues != "Testis")%>%
-  distinct(HGNC.ID,GTEX.tissues,Expression,n,freq)
-
-#View(greater0_pheno_fischer_NO_TISSUE)
-# superclass="Abnormality of the genitourinary system", 
-#Tissue="Testis")
-#
-#change them into factors
-greater0_pheno_fischer_NO_TISSUE$HGNC.ID <- as.factor(greater0_pheno_fischer_NO_TISSUE$HGNC.ID)
-greater0_pheno_fischer_NO_TISSUE$Expression <- as.factor(greater0_pheno_fischer_NO_TISSUE$Expression)
-
-
-
-
-greater0_pheno_fischer_tissue<-greater0_pheno_fischer%>%
-  select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-  filter(HPO.superclass.description =="Abnormality of the genitourinary system" )%>%
-  filter(GTEX.tissues == "Testis" )%>%
-  distinct(GTEX.tissues,Expression,n)%>%
-  spread(Expression,n)%>%
-  distinct(GTEX.tissues,No, Yes)
-
-
-#All tissues without the Adipose_Subcutaneous
-
-All_tissues<-greater0_pheno_fischer_NO_TISSUE %>%
-  spread(Expression,n)%>%
-  distinct()
-
-##View(all_tissues)
-
-
-# Sum all of the No and Yes rows to get total 
-
-All_tissues_<-All_tissues%>%
-  select_all()%>%
-  summarise_at(c("No","Yes"),sum) %>% #sums the columns
-  distinct(No, Yes)%>%
-  mutate(GTEX.tissues="Total")%>%
-  distinct(GTEX.tissues,No,Yes)
-
-
-##View(all_tissues_)
-
-
-# Bind the two datfarames to create a matrix
-Total_Tissues<-rbind(greater0_pheno_fischer_tissue,All_tissues_)
-
-
-#define the rownames 
-library(magrittr)
-Total_Tissues<-Total_Tissues %>%
-  set_rownames(.$GTEX.tissues) %>% 
-  select(-GTEX.tissues)
-
-
-#View(Total_Tissues)
-
-
-# perform Fisher test
-
-PVals<-fisher.test(Total_Tissues,alternative='two.sided')  # THIS WORKED
-
-PVALUES<-PVals$p.value
-
-PVALUES
-
-
-
-
-
-
-
-
-
-#################~~~~~~~~~~~~~~~~~~~~~~~~~~~~~THE FUNCTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#################################
-
-
-
-TISSUE_FISHER_TEST<-function(df,superclass, Tissue){  
-  
-# For each threhsold the number of genes being expressed is counted 
-  
-  #change df to  long format using gather
-  # keep gene id here
-  pheno_cleaned <- df %>% 
-    gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
-    select(GTEX.tissues,`HPO-Term-ID`,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
-    distinct()
-  #View(pheno_cleaned)
-  
-  
-  
-  pheno_cleaned_count<-pheno_cleaned%>%
-    dplyr::group_by(GTEX.tissues,Expression) %>%  # group by gene here 
-    dplyr::summarise(n=n()) 
-  
-  #View(pheno_cleaned_count)
-  
-  
-  
-  GTEX.Tissues.to.tissues<-GTEX.Tissues.to.HPO%>%
-    select_all()%>%
-    drop_na()%>%
-    select(GTEX.tissues)
-  
-  ## There are some tissues that are found in different HPO.superclass.description tehrefore have been duplicated in the GTEX.Tissues.to.tissues
-  
-  # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
-  
-  pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned_count, 
-                               by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
-  
-  
-  # The human_genes_TPM_greater0_pheno_count and GTEX.Tissues.to.HPO joind to get the HPO.superclass.description for each tissue
-  
-  pheno_cleaned_Tissues<-inner_join(GTEX.Tissues.to.HPO,pheno_cleaned_Tissues)
-  pheno_cleaned_Tissues<-pheno_cleaned_Tissues%>%
-    select_all()%>%
-    drop_na()%>%    # the NAs are dropped
-    distinct(GTEX.tissues,HPO.id, HPO.superclass.id,HPO.superclass.description,Expression,n ) # duplicates are removed that are not needed
-  
-  #View(pheno_cleaned_Tissues)
-  
-  
- # #View(human_genes_TPM_greater0_pheno_Tissues)
-  
-  pheno_cleaned_Tissues$Expression <- as.factor(pheno_cleaned_Tissues$Expression)
-  pheno_cleaned_Tissues$GTEX.tissues <- as.factor(pheno_cleaned_Tissues$GTEX.tissues)
-  pheno_cleaned_Tissues$HPO.superclass.description <- as.factor(pheno_cleaned_Tissues$HPO.superclass.description)
-  
-  pheno_cleaned_Tissues$HPO.id <- as.factor(pheno_cleaned_Tissues$HPO.id)
-  pheno_cleaned_Tissues$HPO.superclass.id <- as.factor(pheno_cleaned_Tissues$HPO.superclass.id)
-  
-
-  ####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
-  
-  
-  
-  
-  greater0_pheno_fischer<-pheno_cleaned_Tissues%>%
-    select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-    distinct()
-
-  greater0_pheno_fischer_NO_TISSUE<-greater0_pheno_fischer%>%
-    select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-    filter(HPO.superclass.description != superclass )%>%
-    filter(GTEX.tissues != Tissue)%>%
-    distinct(GTEX.tissues,Expression,n)
-
-  
-  
-  #change them into factors
-  greater0_pheno_fischer_NO_TISSUE$GTEX.tissues <- as.factor(greater0_pheno_fischer_NO_TISSUE$GTEX.tissues)
-  greater0_pheno_fischer_NO_TISSUE$Expression <- as.factor(greater0_pheno_fischer_NO_TISSUE$Expression)
-
-  
-  
-  
-  greater0_pheno_fischer_tissue<-greater0_pheno_fischer%>%
-    select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
-    filter(HPO.superclass.description ==superclass)%>%
-    filter(GTEX.tissues == Tissue )%>%
-    distinct(GTEX.tissues,Expression,n)%>%
-    spread(Expression,n)%>%
-    distinct(GTEX.tissues,No, Yes)
-
-  
-  #All tissues without the Adipose_Subcutaneous
-  
-  All_tissues<-greater0_pheno_fischer_NO_TISSUE %>%
-    spread(Expression,n)%>%
-    distinct()
-  
-  ##View(all_tissues)
-  
-  
-  # Sum all of the No and Yes rows to get total 
-  
-  All_tissues_<-All_tissues%>%
-    select_all()%>%
-    summarise_at(c("No","Yes"),sum) %>% #sums the columns
-    distinct(No, Yes)%>%
-    mutate(GTEX.tissues="Total")%>%
-    distinct(GTEX.tissues,No,Yes)
-  
-  
-  ##View(all_tissues_)
-  
-
-  # Bind the two datfarames to create a matrix
-  Total_Tissues<-rbind(greater0_pheno_fischer_tissue,All_tissues_)
-  
-  
-  #define the rownames 
-  library(magrittr)
-  Total_Tissues<-Total_Tissues %>%
-    set_rownames(.$GTEX.tissues) %>% 
-    select(-GTEX.tissues)
- 
-  
-  #View(Total_Tissues)
-  
-  
-  # perform Fisher test
-  
-  PVals<-fisher.test(Total_Tissues,alternative='two.sided')  # THIS WORKED
-
-  PVALUES<-PVals$p.value
-
-  return(PVALUES)
-   
-  }
-
-
-# #TEST FUNCTION
-TISSUE_FISHER_TEST(df=human_genes_TPM_greater0_pheno,
-                    superclass="Abnormality of the genitourinary system", 
-                    Tissue="Testis")
-# superclass= "Abnormality of connective tissue"
-# Tissue="Adipose - Subcutaneous"
-
-
-
-
-#Group by tissue and gene 
-
-
-###########~~~~~~~~~~~~~~~~USE OF FOR-LOOP ~~~~~#
-
-#THE FOR LOOP ITERATES THROUGH THE all_disease_genes_pheno_Tissues DATAFRAME WHICH HAS ALL TISSUES AND HPO.DESC(TOPLEVEL)
-
-# CREATE A data frame with two columns and 55 rows, WHICH HAS THE TISSUE NAMES, HPO.SUPERCLASS AND AN EMPTY COLUMN
-
-
-# NO GENE EXPRESSION 
-PVALUE_Tissues_None <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
-                                      all_disease_genes_pheno_Tissues$HPO.superclass.description,
-                                      P.VALUE=vector(length=55)) 
-
-
-#View(human_genes_TPM_greater0_pheno)
-for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
-  ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
-  jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
-  
-  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-  print(jj)
-  
-        
-  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-  PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_None_pheno, # THE FUNCTION NEEDS THE DF THAT HAS THE GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
-  
-                           superclass= paste(jj), 
-                           Tissue=paste(ii))
-  
-  print(PVAL)                  # THE PVALUE IS PRINTED
-  
-  PVALUE_Tissues_None$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-  
-}
-
-# THE DATAFRAME IS #ViewED
-#View(PVALUE_Tissues_None)
-
-
-
-# > 0
-PVALUE_Tissues_GREATER0 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
-                                      all_disease_genes_pheno_Tissues$HPO.superclass.description,
-                                      P.VALUE=vector(length=55)) 
-
-for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
-  ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
-  jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
- 
-  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-  print(jj)
-  
-           
-  
-  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-  PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_greater0_pheno, # THE FUNCTION NEEDS THE DF THAT HAS THE GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
-                           superclass= paste(jj), 
-                           Tissue=paste(ii))
-  
-  print(PVAL)                  # THE PVALUE IS PRINTED
-
-  PVALUE_Tissues_GREATER0$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-
-}
-
-# THE DATAFRAME IS #ViewED
-#View(PVALUE_Tissues_GREATER0)
-
-
-
-# > 0.1
-PVALUE_Tissues_0.1 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
-                                      all_disease_genes_pheno_Tissues$HPO.superclass.description,
-                                      P.VALUE=vector(length=55)) 
-
-for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
-  ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
-  jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
-  
-  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-  print(jj)
-  
-            
-  
-  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-  PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_0.1_pheno, # THE FUNCTION NEED THE DF THAT HAS TEH GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
-                           superclass= paste(jj), 
-                           Tissue=paste(ii))
-  
-  print(PVAL)                  # THE PVALUE IS PRINTED
-  
-  PVALUE_Tissues_0.1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-  
-}
-
-# THE DATAFRAME IS #ViewED
-#View(PVALUE_Tissues_0.1)
-
-# > 1
-PVALUE_Tissues_1 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
-                                 all_disease_genes_pheno_Tissues$HPO.superclass.description,
-                                 P.VALUE=vector(length=55)) 
-
-for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
-  ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
-  jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
-  
-  print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-  print(jj)
-        
-  
-  ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-  PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_1_pheno,# THE FUNCTION NEED THE DF THAT HAS TEH GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
-                           superclass= paste(jj), 
-                           Tissue=paste(ii))
-  
-  print(PVAL)                  # THE PVALUE IS PRINTED
-  
-  PVALUE_Tissues_1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-  
-}
-
-# THE DATAFRAME IS #ViewED
-#View(PVALUE_Tissues_1)
-
-
-
-
-
-
-
-
-
-#######################~~~~~~~~~~~~~~~~~~~~~~~~~Gene Level Analysis ~~~~~~~~~~~~~~~~~~~~~~~~###################
-
-
+# 
+# 
+# TISSUE_FISHER_TEST<-function(df,superclass, Tissue){  
+#   
+# # For each threhsold the number of genes being expressed is counted 
+#   
+#   #change df to  long format using gather
+#   # keep gene id here
+#   pheno_cleaned <- df %>% 
+#     gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
+#     select(GTEX.tissues,`HPO-Term-ID`,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
+#     distinct()
+#   #View(pheno_cleaned)
+#   
+#   
+#   
+#   pheno_cleaned_count<-pheno_cleaned%>%
+#     dplyr::group_by(GTEX.tissues,Expression) %>%  # group by gene here 
+#     dplyr::summarise(n=n()) 
+#   
+#   #View(pheno_cleaned_count)
+#   
+#   
+#   
+#   GTEX.Tissues.to.tissues<-GTEX.Tissues.to.HPO%>%
+#     select_all()%>%
+#     drop_na()%>%
+#     select(GTEX.tissues)
+#   
+#   ## There are some tissues that are found in different HPO.superclass.description tehrefore have been duplicated in the GTEX.Tissues.to.tissues
+#   
+#   # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
+#   
+#   pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned_count, 
+#                                by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
+#   
+#   
+#   # The human_genes_TPM_greater0_pheno_count and GTEX.Tissues.to.HPO joind to get the HPO.superclass.description for each tissue
+#   
+#   pheno_cleaned_Tissues<-inner_join(GTEX.Tissues.to.HPO,pheno_cleaned_Tissues)
+#   pheno_cleaned_Tissues<-pheno_cleaned_Tissues%>%
+#     select_all()%>%
+#     drop_na()%>%    # the NAs are dropped
+#     distinct(GTEX.tissues,HPO.id, HPO.superclass.id,HPO.superclass.description,Expression,n ) # duplicates are removed that are not needed
+#   
+#   #View(pheno_cleaned_Tissues)
+#   
+#   
+#  # #View(human_genes_TPM_greater0_pheno_Tissues)
+#   
+#   pheno_cleaned_Tissues$Expression <- as.factor(pheno_cleaned_Tissues$Expression)
+#   pheno_cleaned_Tissues$GTEX.tissues <- as.factor(pheno_cleaned_Tissues$GTEX.tissues)
+#   pheno_cleaned_Tissues$HPO.superclass.description <- as.factor(pheno_cleaned_Tissues$HPO.superclass.description)
+#   
+#   pheno_cleaned_Tissues$HPO.id <- as.factor(pheno_cleaned_Tissues$HPO.id)
+#   pheno_cleaned_Tissues$HPO.superclass.id <- as.factor(pheno_cleaned_Tissues$HPO.superclass.id)
+#   
+# 
+#   ####~~~~~~~~~~~~~~~~~ To do a Fischer test for every Tissue vs Tissues not in the same System~~~~~~~
+#   
+#   
+#   
+#   
+#   greater0_pheno_fischer<-pheno_cleaned_Tissues%>%
+#     select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
+#     distinct()
+# 
+#   greater0_pheno_fischer_NO_TISSUE<-greater0_pheno_fischer%>%
+#     select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
+#     filter(HPO.superclass.description != superclass )%>%
+#     filter(GTEX.tissues != Tissue)%>%
+#     distinct(GTEX.tissues,Expression,n)
+# 
+#   
+#   
+#   #change them into factors
+#   greater0_pheno_fischer_NO_TISSUE$GTEX.tissues <- as.factor(greater0_pheno_fischer_NO_TISSUE$GTEX.tissues)
+#   greater0_pheno_fischer_NO_TISSUE$Expression <- as.factor(greater0_pheno_fischer_NO_TISSUE$Expression)
+# 
+#   
+#   
+#   
+#   greater0_pheno_fischer_tissue<-greater0_pheno_fischer%>%
+#     select(GTEX.tissues,HPO.superclass.description,Expression,n)%>%
+#     filter(HPO.superclass.description ==superclass)%>%
+#     filter(GTEX.tissues == Tissue )%>%
+#     distinct(GTEX.tissues,Expression,n)%>%
+#     spread(Expression,n)%>%
+#     distinct(GTEX.tissues,No, Yes)
+# 
+#   
+#   #All tissues without the Adipose_Subcutaneous
+#   
+#   All_tissues<-greater0_pheno_fischer_NO_TISSUE %>%
+#     spread(Expression,n)%>%
+#     distinct()
+#   
+#   ##View(all_tissues)
+#   
+#   
+#   # Sum all of the No and Yes rows to get total 
+#   
+#   All_tissues_<-All_tissues%>%
+#     select_all()%>%
+#     summarise_at(c("No","Yes"),sum) %>% #sums the columns
+#     distinct(No, Yes)%>%
+#     mutate(GTEX.tissues="Total")%>%
+#     distinct(GTEX.tissues,No,Yes)
+#   
+#   
+#   ##View(all_tissues_)
+#   
+# 
+#   # Bind the two datfarames to create a matrix
+#   Total_Tissues<-rbind(greater0_pheno_fischer_tissue,All_tissues_)
+#   
+#   
+#   #define the rownames 
+#   library(magrittr)
+#   Total_Tissues<-Total_Tissues %>%
+#     set_rownames(.$GTEX.tissues) %>% 
+#     select(-GTEX.tissues)
+#  
+#   
+#   #View(Total_Tissues)
+#   
+#   
+#   # perform Fisher test
+#   
+#   PVals<-fisher.test(Total_Tissues,alternative='two.sided')  # THIS WORKED
+# 
+#   PVALUES<-PVals$p.value
+# 
+#   return(PVALUES)
+#    
+#   }
+# 
+# 
+# # #TEST FUNCTION
+# TISSUE_FISHER_TEST(df=human_genes_TPM_greater0_pheno,
+#                     superclass="Abnormality of the genitourinary system", 
+#                     Tissue="Testis")
+# # superclass= "Abnormality of connective tissue"
+# # Tissue="Adipose - Subcutaneous"
+# 
+# 
+# 
+# 
+# #Group by tissue and gene 
+# 
+# 
+# ###########~~~~~~~~~~~~~~~~USE OF FOR-LOOP ~~~~~#
+# 
+# #THE FOR LOOP ITERATES THROUGH THE all_disease_genes_pheno_Tissues DATAFRAME WHICH HAS ALL TISSUES AND HPO.DESC(TOPLEVEL)
+# 
+# # CREATE A data frame with two columns and 55 rows, WHICH HAS THE TISSUE NAMES, HPO.SUPERCLASS AND AN EMPTY COLUMN
+# 
+# 
+# # NO GENE EXPRESSION 
+# PVALUE_Tissues_None <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
+#                                       all_disease_genes_pheno_Tissues$HPO.superclass.description,
+#                                       P.VALUE=vector(length=55)) 
+# 
+# 
+# #View(human_genes_TPM_greater0_pheno)
+# for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
+#   ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
+#   jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
+#   
+#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+#   print(jj)
+#   
+#         
+#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+#   PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_None_pheno, # THE FUNCTION NEEDS THE DF THAT HAS THE GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
+#   
+#                            superclass= paste(jj), 
+#                            Tissue=paste(ii))
+#   
+#   print(PVAL)                  # THE PVALUE IS PRINTED
+#   
+#   PVALUE_Tissues_None$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+#   
+# }
+# 
+# # THE DATAFRAME IS #ViewED
+# #View(PVALUE_Tissues_None)
+# 
+# 
+# 
+# # > 0
+# PVALUE_Tissues_GREATER0 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
+#                                       all_disease_genes_pheno_Tissues$HPO.superclass.description,
+#                                       P.VALUE=vector(length=55)) 
+# 
+# for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
+#   ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
+#   jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
+#  
+#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+#   print(jj)
+#   
+#            
+#   
+#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+#   PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_greater0_pheno, # THE FUNCTION NEEDS THE DF THAT HAS THE GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
+#                            superclass= paste(jj), 
+#                            Tissue=paste(ii))
+#   
+#   print(PVAL)                  # THE PVALUE IS PRINTED
+# 
+#   PVALUE_Tissues_GREATER0$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+# 
+# }
+# 
+# # THE DATAFRAME IS #ViewED
+# #View(PVALUE_Tissues_GREATER0)
+# 
+# 
+# 
+# # > 0.1
+# PVALUE_Tissues_0.1 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
+#                                       all_disease_genes_pheno_Tissues$HPO.superclass.description,
+#                                       P.VALUE=vector(length=55)) 
+# 
+# for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
+#   ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
+#   jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
+#   
+#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+#   print(jj)
+#   
+#             
+#   
+#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+#   PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_0.1_pheno, # THE FUNCTION NEED THE DF THAT HAS TEH GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
+#                            superclass= paste(jj), 
+#                            Tissue=paste(ii))
+#   
+#   print(PVAL)                  # THE PVALUE IS PRINTED
+#   
+#   PVALUE_Tissues_0.1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+#   
+# }
+# 
+# # THE DATAFRAME IS #ViewED
+# #View(PVALUE_Tissues_0.1)
+# 
+# # > 1
+# PVALUE_Tissues_1 <- data.frame(all_disease_genes_pheno_Tissues$GTEX.tissues,
+#                                  all_disease_genes_pheno_Tissues$HPO.superclass.description,
+#                                  P.VALUE=vector(length=55)) 
+# 
+# for(i in 1:nrow(all_disease_genes_pheno_Tissues)) {
+#   ii <- all_disease_genes_pheno_Tissues[i,1]     #FIRST COLUMN
+#   jj <-all_disease_genes_pheno_Tissues[i,2]      #SECOND COLUMN
+#   
+#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+#   print(jj)
+#         
+#   
+#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+#   PVAL<-TISSUE_FISHER_TEST(df=human_genes_TPM_1_pheno,# THE FUNCTION NEED THE DF THAT HAS TEH GENE GENE EXPRESSIONS AT SPECIFIC THRESHOLDS
+#                            superclass= paste(jj), 
+#                            Tissue=paste(ii))
+#   
+#   print(PVAL)                  # THE PVALUE IS PRINTED
+#   
+#   PVALUE_Tissues_1$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+#   
+# }
+# 
+# # THE DATAFRAME IS #ViewED
+# #View(PVALUE_Tissues_1)
+# 
+# 
+# 
+# 
+# 
+# 
