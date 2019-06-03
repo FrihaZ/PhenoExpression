@@ -102,15 +102,29 @@ approved_hgnc.id <- approved_hgnc.id %>%
 
 human_genes <-left_join(human_genes, approved_hgnc.id, by=c("Description" = "Gene.Symbol"))  
 
-## NEW
 ## KEEP THE ENTREZ IDS  FOR GENE ENRICHMENT ANALYSIS
 
 human_genes_with_GENE_ID <-human_genes%>%
-  select(HGNC.ID,gene_id, Description, Type,`Adipose - Subcutaneous`:`Whole Blood`)%>% 
+  select(HGNC.ID)%>% 
   drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
   distinct()
 
-View(human_genes_with_GENE_ID)
+# open gene_protein
+
+gene_protein_ENTREZ<-gene_protein%>%
+  select(entrez_id, hgnc_id)%>%
+  distinct()
+
+#View(gene_protein_ENTREZ)
+
+
+names(gene_protein_ENTREZ)[names(gene_protein_ENTREZ) == 'hgnc_id'] <- 'HGNC.ID'
+
+human_genes_with_GENE_ID_entrez<-right_join(gene_protein_ENTREZ, human_genes_with_GENE_ID)
+ 
+
+View(human_genes_with_GENE_ID_entrez)
+#######################################
 
 human_genes <-human_genes%>%
   select(HGNC.ID,gene_id, Description, Type,`Adipose - Subcutaneous`:`Whole Blood`)%>% 
@@ -2514,21 +2528,50 @@ View(test.set_1)
 
 ## GO annotations and enrichment ################################################################################################
 
-# # 
+# # # 
 # source("https://bioconductor.org/biocLite.R")
 # biocLite("org.Hs.eg.db")
 # # 
 # source("https://bioconductor.org/biocLite.R") 
-# biocLite("multtest") 
+# biocLite("GOstats") 
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+# The following initializes usage of Bioc devel
+BiocManager::install(version='devel')
+
+BiocManager::install("BiocGenerics")
+
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("org.Hs.eg.db")
+
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("GOstats")
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("multtest")
+
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("GO.db")
 
 library(org.Hs.eg.db);library(GOstats);library(multtest); library(GO.db)
 # 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("multtest")
-
-
 
 go.enrichment <- function(test.set,reference.set,ontology.type ="BP",label=NULL) {
   
@@ -2588,19 +2631,59 @@ go.enrichment <- function(test.set,reference.set,ontology.type ="BP",label=NULL)
   
 }
 
-
-
-
-enr_BP<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="BP",label=NULL)
-
-enr_CC<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="CC",label=NULL)
-
-enr_MF<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="MF",label=NULL)
-
-View(enr_BP)
-View(enr_CC)
-View(enr_MF)
+# TPM >1
                                
+#Biological Pathway
+
+go.enrichment_BP_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="BP",label=NULL)
+
+#write.csv(go.enrichment_BP_1,'./Output_Files/go.enrichment_BP_1.csv')
+
+#Cellular Component
+go.enrichment_CC_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="CC",label=NULL)
+
+#write.csv(go.enrichment_CC_1,'./Output_Files/go.enrichment_CC_1.csv')
+
+
+# Molecular Function
+go.enrichment_MF_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="MF",label=NULL)
+
+write.csv(go.enrichment_MF_1,'./Output_Files/go.enrichment_MF_1.csv')
+
+
+
+View(go.enrichment_BP_1)
+View(go.enrichment_CC_1)
+View(go.enrichment_MF_1)
+
+
+
+# TPM >0.1
+
+#Biological Pathway
+go.enrichment_BP_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="BP",label=NULL)
+
+#write.csv(go.enrichment_BP_0.1,'./Output_Files/go.enrichment_BP_0.1.csv')
+
+#Cellular Component
+
+go.enrichment_CC_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="CC",label=NULL)
+
+#write.csv(go.enrichment_CC_0.1,'./Output_Files/go.enrichment_CC_0.1.csv')
+
+
+
+# Molecular Function
+go.enrichment_MF_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="MF",label=NULL)
+
+#write.csv(go.enrichment_MF_0.1,'./Output_Files/go.enrichment_MF_0.1.csv')
+
+View(go.enrichment_BP_0.1)
+View(go.enrichment_CC_0.1)
+View(go.enrichment_MF_0.1)
+
+
+               
                                
                                
 #################################################################################################################################################
