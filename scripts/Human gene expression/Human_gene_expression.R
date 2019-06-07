@@ -1,5 +1,6 @@
 
-################################################################################################################################
+##################################################################################
+###############################################################################################################################
 ###############################################################################################################################
 
 ### Project: PhenoExpression ##################################################################################################
@@ -47,7 +48,7 @@ human_genes_filtered <-human_genes %>%
   pull(Description)           # to make it into a vector for the hgnc.checker to work
 
 
-##View(human_genes_filtered)   
+View(human_genes_filtered)   
 
 
 
@@ -70,7 +71,7 @@ human_genes_filtered <-human_genes %>%
 
 approved_hgnc.id <- hgnc.checker(human_genes_filtered, gene_protein)
 
-##View(approved_hgnc.id)
+View(approved_hgnc.id)
 
 
 
@@ -83,7 +84,7 @@ approved_hgnc.id <- approved_hgnc.id %>%
   filter(HGNC.ID  != "-") %>%  #Remove ambiguous expression data
   filter(Type != "Ambiguous.Symbol") 
 
-##View(approved_hgnc.id)
+View(approved_hgnc.id)
 
 
 ################################################################################################################################
@@ -121,10 +122,14 @@ gene_protein_ENTREZ<-gene_protein%>%
 names(gene_protein_ENTREZ)[names(gene_protein_ENTREZ) == 'hgnc_id'] <- 'HGNC.ID'
 
 human_genes_with_GENE_ID_entrez<-right_join(gene_protein_ENTREZ, human_genes_with_GENE_ID)
- 
+
 
 View(human_genes_with_GENE_ID_entrez)
-#######################################
+
+
+#View(human_genes)
+
+## Clean human_genes by removing thre gene_id
 
 human_genes <-human_genes%>%
   select(HGNC.ID,gene_id, Description, Type,`Adipose - Subcutaneous`:`Whole Blood`)%>% 
@@ -133,8 +138,6 @@ human_genes <-human_genes%>%
   distinct()
 
 options("scipen"=100)
-
-#View(human_genes)
 
 
 
