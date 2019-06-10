@@ -1799,9 +1799,14 @@ GTEX.to.human_genes <- function(GTEX.Tissues ,human_genes, Abnormality,
     +geom_text(aes(label=paste0(round(human_genes_cleaned_ABN_COUNT$Frequency,1))),size = 4, 
                position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
     
-    + coord_flip()%>%
-    + ggsave(filename=paste("./Plots/Human/System/", System_Threshold,".png",sep=" "),
-             width = 10, height = 10, dpi = 150, units = "in", device='png')
+    + coord_flip()
+  
+  # Save plot
+  
+  library(cowplot)
+  save_plot(paste("./Plots/Human/System/", System_Threshold,".jpeg"),
+            GTEX.human_genes_cleaned_ABN_COUNT_p ,base_height= 5.5 ,base_aspect_ratio = 2) 
+  
   
   }
 
