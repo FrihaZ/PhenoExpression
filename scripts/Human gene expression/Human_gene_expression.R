@@ -5872,85 +5872,177 @@ TPM_1_CC;
 ggsave("./Plots/Human/GENE EXPRESSION ANALYSIS/TPM_1_CC.pdf");
 
 
+
 # >1 BP
+# New
 
 
-# install.packages( "ggplot2" );
-library( ggplot2 );
-# --------------------------------------------------------------------------
-# If you don't have the scales package installed, uncomment the following line:
-# install.packages( "scales" );
-library( scales );
+library( ggplot2 );library( scales );library(RColorBrewer);library(cowplot)
+
+revigo.names = c("term_ID","description","frequency_%","plot_X","plot_Y","plot_size","log10.pvalue","uniqueness","dispensability");
+revigo.data.1 <- rbind(c("GO:0098660","inorganic ion transmembrane transport", 4.409,-6.009, 2.077, 2.884,-2.0718,0.677,0.000),
+                       c("GO:0099505","regulation of presynaptic membrane potential", 0.219,-6.244,-4.618, 1.591,-1.8734,0.811,0.000),
+                       c("GO:0099537","trans-synaptic signaling", 3.485,-2.260,-5.221, 2.782,-6.6624,0.702,0.000),
+                       c("GO:0071420","cellular response to histamine", 0.046, 2.284, 0.057, 0.954,-2.3017,0.905,0.002),
+                       c("GO:0030534","adult behavior", 0.819, 1.834, 5.982, 2.155,-1.8734,0.721,0.013),
+                       c("GO:0019233","sensory perception of pain", 0.537, 6.014, 1.448, 1.973,-1.7194,0.809,0.104),
+                       c("GO:0022010","central nervous system myelination", 0.087, 5.033,-3.687, 1.204,-1.8734,0.837,0.115),
+                       c("GO:0035235","ionotropic glutamate receptor signaling pathway", 0.150, 0.717,-6.884, 1.431,-4.1264,0.795,0.130),
+                       c("GO:0015844","monoamine transport", 0.427,-3.884, 2.130, 1.875,-1.3473,0.803,0.203),
+                       c("GO:0097480","establishment of synaptic vesicle localization", 0.767,-5.385, 3.879, 2.127,-1.8734,0.807,0.211),
+                       c("GO:0099003","vesicle-mediated transport in synapse", 0.767,-4.397, 4.662, 2.127,-1.8734,0.817,0.218),
+                       c("GO:1904862","inhibitory synapse assembly", 0.017, 3.981,-4.336, 0.602,-1.5010,0.849,0.228),
+                       c("GO:0045163","clustering of voltage-gated potassium channels", 0.017, 4.706,-4.881, 0.602,-1.3351,0.845,0.288),
+                       c("GO:0060134","prepulse inhibition", 0.075, 6.167, 0.817, 1.146,-1.5010,0.792,0.387),
+                       c("GO:0031644","regulation of neurological system process", 0.387, 5.486, 2.329, 1.833,-1.3902,0.786,0.446),
+                       c("GO:0098976","excitatory chemical synaptic transmission", 0.006,-2.490,-5.778, 0.301,-1.8734,0.778,0.494),
+                       c("GO:0042756","drinking behavior", 0.058, 1.162, 6.520, 1.041,-1.3351,0.796,0.540),
+                       c("GO:0042749","regulation of circadian sleep/wake cycle", 0.127, 2.549, 5.560, 1.362,-1.6193,0.737,0.578),
+                       c("GO:0022898","regulation of transmembrane transporter activity", 1.166,-6.259, 2.637, 2.307,-1.5010,0.717,0.609),
+                       c("GO:0060080","inhibitory postsynaptic potential", 0.081,-3.316,-4.989, 1.176,-1.8734,0.662,0.618),
+                       c("GO:0023061","signal release", 2.441,-4.086,-1.470, 2.627,-1.5978,0.639,0.619),
+                       c("GO:0072511","divalent inorganic cation transport", 2.499,-6.355, 1.527, 2.637,-1.5010,0.704,0.638),
+                       c("GO:0097553","calcium ion transmembrane import into cytosol", 0.629,-5.676, 0.418, 2.041,-1.5010,0.609,0.645),
+                       c("GO:0048169","regulation of long-term neuronal synaptic plasticity", 0.133,-3.742,-4.610, 1.380,-1.5010,0.709,0.649),
+                       c("GO:0007628","adult walking behavior", 0.162, 1.640, 6.383, 1.462,-1.8175,0.740,0.653));
+
+one.data.1 = data.frame(revigo.data.1);
+names(one.data.1) = revigo.names;
+one.data.1$plot_X = as.numeric( as.character(one.data.1$plot_X) );
+one.data.1$plot_Y = as.numeric( as.character(one.data.1$plot_Y) );
+one.data.1$plot_size = as.numeric( as.character(one.data.1$plot_size) );
+one.data.1$log10.pvalue = as.numeric( as.character(one.data.1$log10.pvalue));
+one.data.1$frequency = as.numeric( as.character(one.data.1$frequency) );
+one.data.1$uniqueness = as.numeric( as.character(one.data.1$uniqueness) );
+one.data.1$dispensability = as.numeric( as.character(one.data.1$dispensability) );
+
+####################################################################################################################
+
+p1 = ggplot( data = one.data.1);
+
+pla3 = rev(brewer.pal(9, "OrRd"))[2:5]
+
+p1 = p1 + geom_point( aes( plot_X, plot_Y, colour = log10.pvalue, size = plot_size), alpha = I(0.6) ) 
+#p1 = p1 + scale_colour_distiller(palette="Greys")
+#p1 = p1 + scale_color_viridis(option = "F")
+p1 = p1 + scale_color_gradientn(colors = pla3)
+p1 = p1 + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
+p1 =  p1 + xlim(-8.5,9.5)
+p1 = p1 + ylim(-7,7)
+p1 = p1  + theme_bw()
+p1 = p1 + labs (y = "semantic space y", x = "semantic space x")
+p1_withlegend = p1 + theme(legend.position=c(0.89,0.2),legend.text=element_text(size=8),legend.box="horizontal")
 
 
-# --------------------------------------------------------------------------
-# Here is your data from REVIGO. Scroll down for plot configuration options.
-
-revigo.names <- c("term_ID","description","frequency_%","plot_X","plot_Y","plot_size","log10_p_value","uniqueness","dispensability");
-revigo.data <- rbind(c("GO:0098660","inorganic ion transmembrane transport", 4.409, 5.922, 2.075, 2.884,-4.6890,0.677,0.000),
-                     c("GO:0099505","regulation of presynaptic membrane potential", 0.219, 6.280,-4.568, 1.591,-4.0513,0.811,0.000),
-                     c("GO:0099537","trans-synaptic signaling", 3.485, 2.294,-5.189, 2.782,-9.8817,0.702,0.000),
-                     c("GO:0071420","cellular response to histamine", 0.046,-2.548,-0.479, 0.954,-5.0439,0.905,0.002),
-                     c("GO:0030534","adult behavior", 0.819,-1.783, 5.978, 2.155,-4.2315,0.721,0.013),
-                     c("GO:0019233","sensory perception of pain", 0.537,-5.968, 1.640, 1.973,-3.7926,0.809,0.104),
-                     c("GO:0022010","central nervous system myelination", 0.087,-5.084,-3.648, 1.204,-4.1643,0.837,0.115),
-                     c("GO:0035235","ionotropic glutamate receptor signaling pathway", 0.150,-0.658,-6.896, 1.431,-7.0447,0.795,0.130),
-                     c("GO:0015844","monoamine transport", 0.427, 3.773, 2.301, 1.875,-3.1516,0.803,0.203),
-                     c("GO:0097480","establishment of synaptic vesicle localization", 0.767, 5.547, 3.918, 2.127,-4.1083,0.807,0.211),
-                     c("GO:0099003","vesicle-mediated transport in synapse", 0.767, 4.398, 4.624, 2.127,-4.2315,0.817,0.218),
-                     c("GO:1904862","inhibitory synapse assembly", 0.017,-3.980,-4.493, 0.602,-3.3706,0.849,0.228),
-                     c("GO:0045163","clustering of voltage-gated potassium channels", 0.017,-4.799,-4.812, 0.602,-3.0920,0.845,0.288),
-                     c("GO:0060134","prepulse inhibition", 0.075,-6.131, 1.016, 1.146,-3.3706,0.792,0.387),
-                     c("GO:0031644","regulation of neurological system process", 0.387,-5.384, 2.475, 1.833,-3.2293,0.786,0.446),
-                     c("GO:0098976","excitatory chemical synaptic transmission", 0.006, 2.522,-5.744, 0.301,-4.0513,0.778,0.494),
-                     c("GO:0042756","drinking behavior", 0.058,-1.120, 6.527, 1.041,-3.0920,0.796,0.540),
-                     c("GO:0042749","regulation of circadian sleep/wake cycle", 0.127,-2.479, 5.562, 1.362,-3.6625,0.737,0.578),
-                     c("GO:0022898","regulation of transmembrane transporter activity", 1.166, 6.299, 2.561, 2.307,-3.3586,0.717,0.609),
-                     c("GO:0060080","inhibitory postsynaptic potential", 0.081, 3.359,-4.967, 1.176,-4.0633,0.662,0.618),
-                     c("GO:0023061","signal release", 2.441, 4.063,-1.434, 2.627,-3.6130,0.639,0.619),
-                     c("GO:0072511","divalent inorganic cation transport", 2.499, 6.247, 1.520, 2.637,-3.4563,0.704,0.638),
-                     c("GO:0097553","calcium ion transmembrane import into cytosol", 0.629, 5.645, 0.442, 2.041,-3.3795,0.609,0.645),
-                     c("GO:0048169","regulation of long-term neuronal synaptic plasticity", 0.133, 3.759,-4.562, 1.380,-3.4330,0.709,0.649),
-                     c("GO:0007628","adult walking behavior", 0.162,-1.582, 6.382, 1.462,-3.9577,0.740,0.653));
-
-one.data <- data.frame(revigo.data);
-names(one.data) <- revigo.names;
-one.data <- one.data [(one.data$plot_X != "null" & one.data$plot_Y != "null"), ];
-one.data$plot_X <- as.numeric( as.character(one.data$plot_X) );
-one.data$plot_Y <- as.numeric( as.character(one.data$plot_Y) );
-one.data$plot_size <- as.numeric( as.character(one.data$plot_size) );
-one.data$log10_p_value <- as.numeric( as.character(one.data$log10_p_value) );
-one.data$frequency <- as.numeric( as.character(one.data$frequency) );
-one.data$uniqueness <- as.numeric( as.character(one.data$uniqueness) );
-one.data$dispensability <- as.numeric( as.character(one.data$dispensability) );
-#head(one.data);
-
-
-# --------------------------------------------------------------------------
-# Names of the axes, sizes of the numbers and letters, names of the columns,
-# etc. can be changed below
-
-TPM_1_BP <- ggplot( data = one.data );
-TPM_1_BP <- TPM_1_BP + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) + scale_size_area();
-TPM_1_BP <- TPM_1_BP + scale_colour_gradientn( colours = c("blue", "green", "yellow", "red"), limits = c( min(one.data$log10_p_value), 0) );
-TPM_1_BP <- TPM_1_BP + geom_point( aes(plot_X, plot_Y, size = plot_size), shape = 21, fill = "transparent", colour = I (alpha ("black", 0.6) )) + scale_size_area();
-TPM_1_BP <- TPM_1_BP + scale_size( range=c(5, 30)) + theme_bw(); # + scale_fill_gradientn(colours = heat_hcl(7), limits = c(-300, 0) );
-ex <- one.data [ one.data$dispensability < 0.15, ];
-TPM_1_BP <- TPM_1_BP + geom_text( data = ex, aes(plot_X, plot_Y, label = description), colour = I(alpha("black", 0.85)), size = 3 );
-TPM_1_BP <- TPM_1_BP + labs (y = "semantic space x", x = "semantic space y");
-TPM_1_BP <- TPM_1_BP + theme(legend.key = element_blank()) ;
-one.x_range = max(one.data$plot_X) - min(one.data$plot_X);
-one.y_range = max(one.data$plot_Y) - min(one.data$plot_Y);
-TPM_1_BP <- TPM_1_BP + xlim(min(one.data$plot_X)-one.x_range/10,max(one.data$plot_X)+one.x_range/10);
-TPM_1_BP <- TPM_1_BP + ylim(min(one.data$plot_Y)-one.y_range/10,max(one.data$plot_Y)+one.y_range/10);
+terms.p1= one.data.1 [ one.data.1$description %in% c("trans-synaptic signaling",
+                                                     "clustering of voltage-gated potassium channels",
+                                                     "vesicle-mediated transport in synapse",
+                                                     "monoamine transport","signal release"), ]
 
 
 
-# --------------------------------------------------------------------------
-# Output the plot to screen
+terms.p1b= one.data.1 [ one.data.1$description %in% c("adult behavior","adult walking behavior",
+                                                      "central nervous system myelination" , 
+                                                      "sensory perception of pain",
+                                                      "inhibitory synapse assembly",
+                                                      "regulation of circadian sleep/wake cycle"), ]
 
-TPM_1_BP;
-ggsave("./Plots/Human/GENE EXPRESSION ANALYSIS/TPM_1_BP.pdf");
+p1 = p1 + geom_text( data = terms.p1, aes(plot_X, plot_Y, label = description), colour = I(alpha("black", 0.85)), size = 4)
+p1 = p1 + geom_text( data = terms.p1b, aes(plot_X, plot_Y, label = description), 
+                     colour = I(alpha("black", 0.85)), 
+                     size = 4,fontface = "bold") 
+
+
+p1 = p1 + ggtitle("Gene Ontology Biological Process")
+p1 = p1 + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face="bold"));p1
+
+
+save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/TPM_1_BP.jpeg",
+          p1 ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+
+
+
+
+### OLD >1 BP
+# 
+# ### OLD >1 BP
+# # install.packages( "ggplot2" );
+# library( ggplot2 );
+# # --------------------------------------------------------------------------
+# # If you don't have the scales package installed, uncomment the following line:
+# # install.packages( "scales" );
+# library( scales );
+# 
+# 
+# # --------------------------------------------------------------------------
+# # Here is your data from REVIGO. Scroll down for plot configuration options.
+# 
+# revigo.names <- c("term_ID","description","frequency_%","plot_X","plot_Y","plot_size","log10_p_value","uniqueness","dispensability");
+# revigo.data <- rbind(c("GO:0098660","inorganic ion transmembrane transport", 4.409, 5.922, 2.075, 2.884,-4.6890,0.677,0.000),
+#                      c("GO:0099505","regulation of presynaptic membrane potential", 0.219, 6.280,-4.568, 1.591,-4.0513,0.811,0.000),
+#                      c("GO:0099537","trans-synaptic signaling", 3.485, 2.294,-5.189, 2.782,-9.8817,0.702,0.000),
+#                      c("GO:0071420","cellular response to histamine", 0.046,-2.548,-0.479, 0.954,-5.0439,0.905,0.002),
+#                      c("GO:0030534","adult behavior", 0.819,-1.783, 5.978, 2.155,-4.2315,0.721,0.013),
+#                      c("GO:0019233","sensory perception of pain", 0.537,-5.968, 1.640, 1.973,-3.7926,0.809,0.104),
+#                      c("GO:0022010","central nervous system myelination", 0.087,-5.084,-3.648, 1.204,-4.1643,0.837,0.115),
+#                      c("GO:0035235","ionotropic glutamate receptor signaling pathway", 0.150,-0.658,-6.896, 1.431,-7.0447,0.795,0.130),
+#                      c("GO:0015844","monoamine transport", 0.427, 3.773, 2.301, 1.875,-3.1516,0.803,0.203),
+#                      c("GO:0097480","establishment of synaptic vesicle localization", 0.767, 5.547, 3.918, 2.127,-4.1083,0.807,0.211),
+#                      c("GO:0099003","vesicle-mediated transport in synapse", 0.767, 4.398, 4.624, 2.127,-4.2315,0.817,0.218),
+#                      c("GO:1904862","inhibitory synapse assembly", 0.017,-3.980,-4.493, 0.602,-3.3706,0.849,0.228),
+#                      c("GO:0045163","clustering of voltage-gated potassium channels", 0.017,-4.799,-4.812, 0.602,-3.0920,0.845,0.288),
+#                      c("GO:0060134","prepulse inhibition", 0.075,-6.131, 1.016, 1.146,-3.3706,0.792,0.387),
+#                      c("GO:0031644","regulation of neurological system process", 0.387,-5.384, 2.475, 1.833,-3.2293,0.786,0.446),
+#                      c("GO:0098976","excitatory chemical synaptic transmission", 0.006, 2.522,-5.744, 0.301,-4.0513,0.778,0.494),
+#                      c("GO:0042756","drinking behavior", 0.058,-1.120, 6.527, 1.041,-3.0920,0.796,0.540),
+#                      c("GO:0042749","regulation of circadian sleep/wake cycle", 0.127,-2.479, 5.562, 1.362,-3.6625,0.737,0.578),
+#                      c("GO:0022898","regulation of transmembrane transporter activity", 1.166, 6.299, 2.561, 2.307,-3.3586,0.717,0.609),
+#                      c("GO:0060080","inhibitory postsynaptic potential", 0.081, 3.359,-4.967, 1.176,-4.0633,0.662,0.618),
+#                      c("GO:0023061","signal release", 2.441, 4.063,-1.434, 2.627,-3.6130,0.639,0.619),
+#                      c("GO:0072511","divalent inorganic cation transport", 2.499, 6.247, 1.520, 2.637,-3.4563,0.704,0.638),
+#                      c("GO:0097553","calcium ion transmembrane import into cytosol", 0.629, 5.645, 0.442, 2.041,-3.3795,0.609,0.645),
+#                      c("GO:0048169","regulation of long-term neuronal synaptic plasticity", 0.133, 3.759,-4.562, 1.380,-3.4330,0.709,0.649),
+#                      c("GO:0007628","adult walking behavior", 0.162,-1.582, 6.382, 1.462,-3.9577,0.740,0.653));
+# 
+# one.data <- data.frame(revigo.data);
+# names(one.data) <- revigo.names;
+# one.data <- one.data [(one.data$plot_X != "null" & one.data$plot_Y != "null"), ];
+# one.data$plot_X <- as.numeric( as.character(one.data$plot_X) );
+# one.data$plot_Y <- as.numeric( as.character(one.data$plot_Y) );
+# one.data$plot_size <- as.numeric( as.character(one.data$plot_size) );
+# one.data$log10_p_value <- as.numeric( as.character(one.data$log10_p_value) );
+# one.data$frequency <- as.numeric( as.character(one.data$frequency) );
+# one.data$uniqueness <- as.numeric( as.character(one.data$uniqueness) );
+# one.data$dispensability <- as.numeric( as.character(one.data$dispensability) );
+# #head(one.data);
+# 
+# 
+# # --------------------------------------------------------------------------
+# # Names of the axes, sizes of the numbers and letters, names of the columns,
+# # etc. can be changed below
+# 
+# TPM_1_BP <- ggplot( data = one.data );
+# TPM_1_BP <- TPM_1_BP + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) + scale_size_area();
+# TPM_1_BP <- TPM_1_BP + scale_colour_gradientn( colours = c("blue", "green", "yellow", "red"), limits = c( min(one.data$log10_p_value), 0) );
+# TPM_1_BP <- TPM_1_BP + geom_point( aes(plot_X, plot_Y, size = plot_size), shape = 21, fill = "transparent", colour = I (alpha ("black", 0.6) )) + scale_size_area();
+# TPM_1_BP <- TPM_1_BP + scale_size( range=c(5, 30)) + theme_bw(); # + scale_fill_gradientn(colours = heat_hcl(7), limits = c(-300, 0) );
+# ex <- one.data [ one.data$dispensability < 0.15, ];
+# TPM_1_BP <- TPM_1_BP + geom_text( data = ex, aes(plot_X, plot_Y, label = description), colour = I(alpha("black", 0.85)), size = 3 );
+# TPM_1_BP <- TPM_1_BP + labs (y = "semantic space x", x = "semantic space y");
+# TPM_1_BP <- TPM_1_BP + theme(legend.key = element_blank()) ;
+# one.x_range = max(one.data$plot_X) - min(one.data$plot_X);
+# one.y_range = max(one.data$plot_Y) - min(one.data$plot_Y);
+# TPM_1_BP <- TPM_1_BP + xlim(min(one.data$plot_X)-one.x_range/10,max(one.data$plot_X)+one.x_range/10);
+# TPM_1_BP <- TPM_1_BP + ylim(min(one.data$plot_Y)-one.y_range/10,max(one.data$plot_Y)+one.y_range/10);
+# 
+# 
+# 
+# # --------------------------------------------------------------------------
+# # Output the plot to screen
+# 
+# TPM_1_BP;
+# ggsave("./Plots/Human/GENE EXPRESSION ANALYSIS/TPM_1_BP.pdf");
+# 
 
 
 
