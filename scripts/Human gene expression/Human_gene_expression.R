@@ -1360,7 +1360,12 @@ p_None_violin<-p_None_violin%>%
   + scale_y_continuous(breaks = seq(-25, 60, by = 20))%>%
   
   + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "The Number of Tissues in which Disease and Non-Disease Associated Genes are Expressed at a Threshold of = 0 TPM ") %>%
+         title= "Gene Expression = 0 TPM ") %>%
+  + theme(axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          axis.text.y= element_text(size=12),
+          axis.text.x= element_text(size=12))%>%
   +stat_summary(fun.data="mean_sdl", 
                 geom="pointrange", width=0.2, colour="black" )%>%
   +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE, 
@@ -1368,6 +1373,14 @@ p_None_violin<-p_None_violin%>%
 
 
 p_None_violin
+
+
+
+
+library(cowplot)
+save_plot("./Plots/Human/Disease_Non-Disease/p_None_violin.jpeg",
+          p_None_violin ,base_height= 5.5 ,base_aspect_ratio = 2) 
+
 
 #res <- wilcox.test(VALUE ~ GROUP, data = HGNC.ID_DISEASE_NON_DI_greater0,
 #                   exact = FALSE)
@@ -1424,7 +1437,14 @@ p_greater0_violin<-p_greater0_violin%>%
   + scale_y_continuous(breaks = seq(-25, 80, by = 20))%>%
   
   + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "The Number of Tissues in which Disease and Non-Disease Associated Genes are Expressed at a Threshold of >0 ") %>%
+         title= "Gene Expression >0 TPM ") %>%
+  
+  + theme(axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          axis.text.y= element_text(size=12),
+          axis.text.x= element_text(size=12))%>%
+  
   +stat_summary(fun.data="mean_sdl", 
                 geom="pointrange", width=0.2, colour="black" )%>%
   +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE, 
@@ -1432,6 +1452,12 @@ p_greater0_violin<-p_greater0_violin%>%
 
 
 p_greater0_violin
+
+
+library(cowplot)
+save_plot("./Plots/Human/Disease_Non-Disease/p_greater0_violin.jpeg",
+          p_greater0_violin ,base_height= 5.5 ,base_aspect_ratio = 2) 
+
 
 #res <- wilcox.test(VALUE ~ GROUP, data = HGNC.ID_DISEASE_NON_DI_greater0,
 #                   exact = FALSE)
@@ -1483,15 +1509,24 @@ p_0.1_violin<- ggplot(HGNC.ID_DISEASE_NON_DI_0.1,
 p_0.1_violin<-p_0.1_violin%>%
   + scale_y_continuous(breaks = seq(-25, 80, by = 20))%>%
   + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "The Number of Tissues in which Disease and Non-Disease Associated Genes are Expressed at a Threshold of >/=0.1 ") %>%
+         title= "Gene Expression > 0.1 TPM ") %>%
+  + theme(axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          axis.text.y= element_text(size=12),
+          axis.text.x= element_text(size=12))%>%
   +stat_summary(fun.data="mean_sdl", 
-                geom="pointrange", width=0.2, colour="black" )%>%
+                geom="pointrange", width=0.2, colour="black")%>%
   +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE, 
                       aes(label = paste0(..method.., "\n", "p =", ..p.format..)))    # Add global p-valu   # Add global p-valu
 
 
 p_0.1_violin
 
+
+library(cowplot)
+save_plot("./Plots/Human/Disease_Non-Disease/p_0.1_violin.jpeg",
+          p_0.1_violin ,base_height= 5.5 ,base_aspect_ratio = 2) 
 
 ### CALCULATE THE MEAN AND THE SD FOR EACH GROUP
 
@@ -1548,7 +1583,12 @@ p_1_violin__<-ggplot(HGNC.ID_DISEASE_NON_DI_1,
 p_1_violin__<-p_1_violin__%>%
   + scale_y_continuous(breaks = seq(-25, 80, by = 20))%>%
   + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "The Number of Tissues in which Disease and Non-Disease Associated Genes are Expressed at a Threshold of >/=1 ") %>%
+         title= "Gene Expression > 1 TPM ") %>%
+  + theme(axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=12),
+          axis.text.y= element_text(size=12),
+          axis.text.x= element_text(size=12))%>%
   +stat_summary(fun.data="mean_sdl", 
                 geom="pointrange", width=0.2, colour="black" )%>%
   +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE, 
@@ -1557,6 +1597,12 @@ p_1_violin__<-p_1_violin__%>%
 
 
 p_1_violin__
+
+
+
+library(cowplot)
+save_plot("./Plots/Human/Disease_Non-Disease/p_1_violin__.jpeg",
+          p_1_violin__ ,base_height= 5.5 ,base_aspect_ratio = 2) 
 
 
 ### CALCULATE THE MEAN AND THE SD FOR EACH GROUP
@@ -1615,10 +1661,9 @@ names(all_disease_genes_hpo_desc)[names(all_disease_genes_hpo_desc)=="n"] <- "Fr
 
 all_disease_genes_hpo_desc_aggr<-aggregate(Frequency~ hpo.description, data = all_disease_genes_hpo_desc, sum)
 
-# #View(all_disease_genes_hpo_desc_aggr)
-
 dev.new(width=60, height=30) # to open in a new window
-
+                               
+# Create Plot                               
 p_all_disease_genes_hpo_desc<-ggplot(data=all_disease_genes_hpo_desc_aggr
                          , aes(x=reorder(all_disease_genes_hpo_desc_aggr$hpo.description,- all_disease_genes_hpo_desc_aggr$Frequency),
                                y=all_disease_genes_hpo_desc_aggr$Frequency, 
@@ -1643,13 +1688,15 @@ p_all_disease_genes_hpo_desc<-p_all_disease_genes_hpo_desc %>%
              position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
   
   + coord_flip()
-  + ggsave(filename=paste("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.png",sep=" "), limitsize = TRUE)
+
+ #ggsave(filename=paste("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.png",sep=" "), limitsize = TRUE)
 
 
 p_all_disease_genes_hpo_desc
 
-
-
+library(cowplot)
+save_plot("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.jpeg",
+          p_all_disease_genes_hpo_desc ,base_height= 5.5 ,base_aspect_ratio = 2) 
 
 
 #######################################################################################################################################################
