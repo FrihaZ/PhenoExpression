@@ -18,5 +18,6 @@ Phenotypes and Gene expression datasets (Human and mouse)
 | gene_with_protein_product.txt | HGNC file - gene symbols to HGNC ids (input file for hgnc_symbol_checker.R function) | from https://www.genenames.org/ |
 | human.mouse.orthologs.txt | One-to-one human-mouse orthologs (HGNC ids- MGI ids) | from Ensembl 95 through biomart [accessed 21/03/2019] | 
 | hp-mp-toplevelmapping.txt | Mapping between HPO and MP top levels | manual curation |
+| mgi.phenotypes.txt |MGI genes and associated phenotypes | http://www.informatics.jax.org ; MGI_GenePheno.rpt; Data Accessed 19.02.06 |
 
 
