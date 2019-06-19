@@ -16,5 +16,7 @@ Phenotypes and Gene expression datasets (Human and mouse)
 | mp.ancestor.nodes.txt | mp terms - mapping to all the ancestor nodes | from https://github.com/pilarcacheiro/Ontologies/tree/master/scripts MP_obo_to_txt.R |
 | mp.top.levels.txt | top levels of the mammalian phenotype ontology | from https://github.com/pilarcacheiro/Ontologies/tree/master/scripts MP_obo_to_txt.R | 
 | gene_with_protein_product.txt | HGNC file - gene symbols to HGNC ids (input file for hgnc_symbol_checker.R function) | from https://www.genenames.org/ |
-| human.mouse.orthologs.txt | One-to-one human-mouse orthologs (HGNC ids- MGI ids) | from Ensembl 95 through biomart [accessed 21/03/2019] |
+| human.mouse.orthologs.txt | One-to-one human-mouse orthologs (HGNC ids- MGI ids) | from Ensembl 95 through biomart [accessed 21/03/2019] | 
+| hp-mp-toplevelmapping.txt | Mapping between HPO and MP top levels | manual curation |
+
 
