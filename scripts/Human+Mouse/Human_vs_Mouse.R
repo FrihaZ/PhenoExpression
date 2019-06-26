@@ -391,46 +391,46 @@ mouse.human.p1
 
 
 
-# 
- library(cowplot)
- save_plot("./Plots/Human+Mouse/mouse_human_p1.png",
-           mouse.human.p1 ,base_height= 6 ,base_aspect_ratio = 3) 
- 
+# save plot
+library(cowplot)
+save_plot("./Plots/Human+Mouse/mouse_human_p1.png",
+         mouse.human.p1 ,base_height= 6 ,base_aspect_ratio = 3) 
+
  
  
  
  ## PLOT
+
+mouse.human.p<-ggplot(Mice.Human.expression.COUNT_, aes(fill=Mice.Human.expression.COUNT_$`Expression Type`, 
+                                                        y=Mice.Human.expression.COUNT_$`Number of Genes`,
+                                                        x=Mice.Human.expression.COUNT_$HPO.MP))%>% 
  
- mouse.human.p<-ggplot(Mice.Human.expression.COUNT_, aes(fill=Mice.Human.expression.COUNT_$`Expression Type`, 
-                                                          y=Mice.Human.expression.COUNT_$`Number of Genes`,
-                                                          x=Mice.Human.expression.COUNT_$HPO.MP))%>% 
-   
-   + labs(x= "HPO Toplevel (Human) + MP Toplevel (Mouse)", y="Number of Genes", 
-          subtitle= "Number of Genes Expressed for each Human Phenotype Ontology (HPO) and Mammalian Phenotype (MP) Annotation")%>%
-   + guides(fill=guide_legend(title="Gene Expression: ")) %>%
-   +theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=10),
-          legend.position = "bottom",legend.direction = "horizontal",
-          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-          axis.text.y= element_text(size=8),
-          axis.text.x= element_text(size=10),
-          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-   +geom_bar( stat="identity")%>%   
-   +facet_wrap(~Mice.Human.expression.COUNT_$`Expression Type` , scales = "free_x")%>%
-   + coord_flip()
- mouse.human.p
+ + labs(x= "HPO Toplevel (Human) + MP Toplevel (Mouse)", y="Number of Genes", 
+        subtitle= "Number of Genes Expressed for each Human Phenotype Ontology (HPO) and Mammalian Phenotype (MP) Annotation")%>%
+ + guides(fill=guide_legend(title="Gene Expression: ")) %>%
+ +theme(axis.title=element_text(size=14,face="bold"),
+        plot.caption=element_text(face = "italic", size=12, hjust = 0),
+        text = element_text(size=10),
+        legend.position = "bottom",legend.direction = "horizontal",
+        legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
+        axis.text.y= element_text(size=8),
+        axis.text.x= element_text(size=10),
+        panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+ +geom_bar( stat="identity")%>%   
+ +facet_wrap(~Mice.Human.expression.COUNT_$`Expression Type` , scales = "free_x")%>%
+ + coord_flip()
+mouse.human.p
+
+
+
+# save plot
+library(cowplot)
+save_plot("./Plots/Human+Mouse/mouse_human_p.png",
+         mouse.human.p ,base_height= 6 ,base_aspect_ratio = 3) 
+
+
  
- 
- 
- # 
- library(cowplot)
- save_plot("./Plots/Human+Mouse/mouse_human_p.png",
-           mouse.human.p ,base_height= 6 ,base_aspect_ratio = 3) 
- 
- 
- 
- #####################################################################################################################
- ################################################################################################################################
+#####################################################################################################################
+################################################################################################################################
  
  
