@@ -357,67 +357,228 @@ p_Concordant %>%
 
 
 
+
+
+
+
+
 ################################################################################################################################
 ################################################################################################################################
 
-## Look deepr into the Cellular Phenotype
+########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EACH PHYSIOLOGICAL SYSTEM~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##############
 
-Cellular_pheno<-mgi.genepheno.tissue.ts28_wt_mutant%>%
-  select(mp.description, MGI.ID, TS28.mutant.expression.detected, TS28.wt.expression.detected)%>%
-  filter(mp.description=="cellular phenotype")%>%
+################################################################################################################################
+################################################################################################################################
+
+
+# ## Look deeper into the Phenotype testing the function outside
+# 
+# mgi.genepheno.tissue.ts28_wt_mutant$TS28.mutant.expression.detected <- as.factor(mgi.genepheno.tissue.ts28_wt_mutant$TS28.mutant.expression.detected)
+# 
+# mgi.genepheno.tissue.ts28_wt_mutant$TS28.wt.expression.detected <- as.factor(mgi.genepheno.tissue.ts28_wt_mutant$TS28.wt.expression.detected)
+# 
+# Cellular_pheno<-mgi.genepheno.tissue.ts28_wt_mutant%>%
+#   select(mp.description, MGI.ID, TS28.mutant.expression.detected, TS28.wt.expression.detected)%>%
+#   filter(mp.description=="skeleton phenotype")%>%
+#   distinct()
+# 
+# 
+# Cellular_pheno_mutant<-Cellular_pheno%>%
+#   select_all()%>%
+#   dplyr::group_by(mp.description,TS28.mutant.expression.detected,.drop = FALSE) %>%
+#   dplyr::summarise(n=n()) %>%
+#   distinct()
+# 
+# View(Cellular_pheno_mutant)
+# 
+# Cellular_pheno_WT<-Cellular_pheno%>%
+#   select_all()%>%
+#   dplyr::group_by(mp.description,TS28.wt.expression.detected, .drop = FALSE ) %>%
+#   dplyr::summarise(n=n()) %>%
+#   distinct()
+# View(Cellular_pheno_WT)
+# 
+# 
+# # CHANGE COLUMN NAME SO THAT THEY CAN BE MERGED
+# 
+# names(Cellular_pheno_mutant)[names(Cellular_pheno_mutant)=="n"] <- "Mutant"
+# 
+# names(Cellular_pheno_mutant)[names(Cellular_pheno_mutant)=="TS28.mutant.expression.detected"] <- "Gene Expression"
+# 
+# 
+# 
+# names(Cellular_pheno_WT)[names(Cellular_pheno_WT)=="n"] <- "WT"
+# 
+# names(Cellular_pheno_WT)[names(Cellular_pheno_WT)=="TS28.wt.expression.detected"] <- "Gene Expression"
+# 
+# 
+# ## MERGE BOTH
+# Cellular_pheno_WT_muta<-merge.data.frame(Cellular_pheno_mutant,Cellular_pheno_WT)
+# 
+# #CLEAN the dataframe
+# 
+# Cellular_pheno_WT_mutant<-Cellular_pheno_WT_muta%>%
+#   select_all()%>%
+#   distinct(`Gene Expression`, Mutant, WT)
+#   
+# 
+# View(Cellular_pheno_WT_muta)
+# 
+# 
+# #library(magrittr)
+# Cellular_pheno_WT_muta_matrix<-Cellular_pheno_WT_mutant %>%
+# #  set_rownames(.$`Gene Expression`)%>%
+#   select(-`Gene Expression`)
+# Cellular_pheno_WT_muta_matrix<-as.matrix(Cellular_pheno_WT_muta_matrix)
+# 
+# View(Cellular_pheno_WT_muta_matrix)
+# 
+# #Fisher Test is conducted
+# 
+# if (nrow(Cellular_pheno_WT_muta_matrix)==2){
+#   
+#   print(fisher.test(as.matrix(Cellular_pheno_WT_muta_matrix)))
+# } else {
+#   return ("0")
+# }
+
+
+
+###############################################################################################################
+###############################################################################################################
+
+#####~~~~~~~~~~~~~~~~~~~~~CREATE FUNCTION TO CALCULATE THE FISHER TEST FOR ALL TISSUES~~~~~~~~~~~~~~~~~~#######
+
+## A list of all mp.Descriptions
+
+list_mouse_tissue<-mgi.genepheno.tissue.ts28_wt_mutant%>%
+  select(mp.description)%>%
   distinct()
 
-Cellular_pheno_mutant<-Cellular_pheno%>%
+View(list_mouse_tissue)
+
+
+#### ~~~~~~~FUNCTION~~~~~~~~~~~#
+
+Tissue_Gene_Mouse<-function(pheno.tissue, mgi.mouse.df){
+  
+  mgi.mouse.df$TS28.mutant.expression.detected <- as.factor(mgi.mouse.df$TS28.mutant.expression.detected)
+  
+  mgi.mouse.df$TS28.wt.expression.detected <- as.factor(mgi.mouse.df$TS28.wt.expression.detected)
+  
+  Tissue_pheno<-mgi.mouse.df%>%
+    select(mp.description, MGI.ID, TS28.mutant.expression.detected, TS28.wt.expression.detected)%>%
+    filter(mp.description==pheno.tissue)%>%
+    distinct()
+  
+  Tissue_pheno_mutant<-Tissue_pheno%>%
+    select_all()%>%
+    dplyr::group_by(mp.description,TS28.mutant.expression.detected, .drop = FALSE ) %>%
+    dplyr::summarise(n=n()) %>%
+    distinct()
+  
+  Tissue_pheno_WT<-Tissue_pheno%>%
+    select_all()%>%
+    dplyr::group_by(mp.description,TS28.wt.expression.detected,.drop = FALSE  ) %>%
+    dplyr::summarise(n=n()) %>%
+    distinct()
+  
+  
+  # CHANGE COLUMN NAME SO THAT THEY CAN BE MERGED
+  
+  names(Tissue_pheno_mutant)[names(Tissue_pheno_mutant)=="n"] <- "Mutant"
+  
+  names(Tissue_pheno_mutant)[names(Tissue_pheno_mutant)=="TS28.mutant.expression.detected"] <- "Gene Expression"
+  
+  
+  
+  names(Tissue_pheno_WT)[names(Tissue_pheno_WT)=="n"] <- "WT"
+  
+  names(Tissue_pheno_WT)[names(Tissue_pheno_WT)=="TS28.wt.expression.detected"] <- "Gene Expression"
+  
+  
+  ## MERGE BOTH
+  Tissue_pheno_WT_muta<-merge.data.frame(Tissue_pheno_mutant,Tissue_pheno_WT)
+  
+  #CLEAN the dataframe
+  
+  Tissue_pheno_WT_muta<-Tissue_pheno_WT_muta%>%
+    select_all()%>%
+    distinct(`Gene Expression`, Mutant, WT)
+  # 
+   #library(magrittr)
+  Tissue_pheno_WT_muta_matrix<-Tissue_pheno_WT_muta %>%
+     select(-`Gene Expression`)
+  # 
+  Tissue_pheno_WT_muta_matrix<-as.matrix(Tissue_pheno_WT_muta_matrix)
+   
+  View(Tissue_pheno_WT_muta_matrix)
+  
+   Tissue_pheno_WT_muta_fisher<-fisher.test(as.matrix(Tissue_pheno_WT_muta_matrix))
+   p_values<-Tissue_pheno_WT_muta_fisher$p.value
+   
+  return(p_values)
+}
+# TESTING FUNCTION
+# 
+# Tissue_Gene_Mouse(pheno.tissue="skeleton phenotype", 
+#                          mgi.mouse.df=mgi.genepheno.tissue.ts28_wt_mutant)
+#  
+
+
+#### FOR LOOP TO ITERATE THROUGH A COLUMN OF ALL MP.DESCRIPTIONS
+PVALUE_Tissues <- data.frame(list_mouse_tissue ,
+                             P.VALUE=vector(length=25))
+
+
+for(i in 1:nrow(list_mouse_tissue)) {
+  ii <- list_mouse_tissue[i,1]     #FIRST COLUMN
+  
+    
+  print(ii)
+ 
+  ### THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
+  PVAL<-Tissue_Gene_Mouse(pheno.tissue=paste(ii), 
+                           mgi.mouse.df=mgi.genepheno.tissue.ts28_wt_mutant)
+  
+  print(PVAL)                  # THE PVALUE IS PRINTED
+ 
+  
+  PVALUE_Tissues$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
+  
+}
+
+View(PVALUE_Tissues)
+
+#write.csv(PVALUE_Tissues,'./Output_Files/Mice/PVALUE_Tissues_Physiologicalsystems.csv')
+
+
+###############################################################################################################
+###############################################################################################################
+## FILTER TO ONLY HAVE SIGNIFICANT PHYSIOLOGICAL SYSTEMS
+
+PVALUE_Tissues_sign<-PVALUE_Tissues%>%
   select_all()%>%
-  dplyr::group_by(mp.description,TS28.mutant.expression.detected) %>%
-  dplyr::summarise(n=n()) %>%
+  filter(P.VALUE<0.05)%>%
   distinct()
 
-Cellular_pheno_WT<-Cellular_pheno%>%
-  select_all()%>%
-  dplyr::group_by(mp.description,TS28.wt.expression.detected ) %>%
-  dplyr::summarise(n=n()) %>%
-  distinct()
+View(PVALUE_Tissues_sign)
+#write.csv(PVALUE_Tissues_sign,'./Output_Files/Mice/PVALUE_Tissues_SIGNIFICANT.csv')
 
 
-# CHANGE COLUMN NAME SO THAT THEY CAN BE MERGED
-
-names(Cellular_pheno_mutant)[names(Cellular_pheno_mutant)=="n"] <- "Mutant"
-
-names(Cellular_pheno_mutant)[names(Cellular_pheno_mutant)=="TS28.mutant.expression.detected"] <- "Gene Expression"
+###############################################################################################################
+###############################################################################################################
 
 
 
-names(Cellular_pheno_WT)[names(Cellular_pheno_WT)=="n"] <- "WT"
-
-names(Cellular_pheno_WT)[names(Cellular_pheno_WT)=="TS28.wt.expression.detected"] <- "Gene Expression"
 
 
-## MERGE BOTH
-Cellular_pheno_WT_muta<-merge.data.frame(Cellular_pheno_mutant,Cellular_pheno_WT)
-
-#CLEAN the dataframe
-
-Cellular_pheno_WT_muta<-Cellular_pheno_WT_muta%>%
-  select_all()%>%
-  distinct(`Gene Expression`, Mutant, WT)
-
-View(Cellular_pheno_WT_muta)
 
 
-# create matrix with the numbers
-Cellular_pheno_WT_muta_matrix = matrix( c(7,9,4,2), # the data elements 
-                    nrow=2,              # number of rows 
-                    ncol=2,              # number of columns 
-                    byrow = TRUE)
 
-View(Cellular_pheno_WT_muta_matrix)
-row.names(Cellular_pheno_WT_muta_matrix) <- c("Yes", "No")   # row names
 
-colnames(Cellular_pheno_WT_muta_matrix) <- c("Mutant", "Wild-Type")   #column names
 
-#Fisher Test is conducted
-Cellular_pheno_WT_muta_fisher<-fisher.test(Cellular_pheno_WT_muta_matrix)
+
 
 ###############################################################################################################
 ###############################################################################################################
