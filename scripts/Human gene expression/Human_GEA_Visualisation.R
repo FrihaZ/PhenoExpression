@@ -4,7 +4,7 @@
 
 ### Project: PhenoExpression ##################################################################################################
 ### Script: Human_GEA_Visualisation.R ###################################################################################################
-### Purpose: To create venn diagrams to show statisticallt significant genes taht may overlap betwene thresholds ###############################################################################
+### Purpose: To create venn diagrams to show statisticallt significant genes that may overlap between thresholds ###############################################################################
 ### Author: Friha Zafar ####################################################################################################
 ### Date: 18/06/2019 ##########################################################################################################
 
@@ -57,8 +57,7 @@ P_1_MF <- ggplot( data = one.data.MF.1 );
 pla3.cc = rev(brewer.pal(9, "OrRd"))[2:5]
 
 P_1_MF = P_1_MF + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
-#P_1_MF = P_1_MF + scale_colour_distiller(palette="Greys")
-#P_1_MF = P_1_MF + scale_color_viridis(option = "F")
+
 P_1_MF = P_1_MF + scale_color_gradientn(colors = pla3.cc)
 P_1_MF = P_1_MF + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 P_1_MF =  P_1_MF + xlim(-10,10)
@@ -69,14 +68,12 @@ P_1_MF_withlegend = P_1_MF + theme(legend.position=c(0.89,0.2),legend.text=eleme
 
 
 ## LABEL THE CIRCLES
-terms.P_1_MF= one.data.MF.1 [ one.data.MF.1$description %in% c("ion gated channel activity",
-                                                               "transmitter-gated channel activity"), ]
+terms.P_1_MF= one.data.MF.1 [ one.data.MF.1$description %in% c("ion gated channel activity"), ]
 
 terms.P_1_MFb= one.data.MF.1 [ one.data.MF.1$description %in% c("transporter activity","beta-amyloid binding",
                                                                 "molecular transducer activity",
                                                                 "glutamate binding",
-                                                                "dopamine binding",
-                                                                "sodium ion transmembrane transporter activity"), ]
+                                                                "dopamine binding"), ]
 
 
 
@@ -94,10 +91,11 @@ P_1_MF = P_1_MF + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face
 
 P_1_MF;
 
-## SAVE PLOT
-
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_MF.jpeg",
-          P_1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_MF.jpeg",
+#           P_1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
 
 ################################################################################
@@ -112,26 +110,79 @@ library(RColorBrewer);
 # Here is your data from REVIGO. Scroll down for plot configuration options.
 
 revigo.names <- c("term_ID","description","frequency_%","plot_X","plot_Y","plot_size","log10_p_value","uniqueness","dispensability");
-revigo.data <- rbind(c("GO:0030054","cell junction", 6.490,-0.663,-6.120, 3.080,-5.0408,0.934,0.000),
-                     c("GO:0030424","axon", 2.098, 5.625,-1.020, 2.590,-3.1271,0.634,0.000),
-                     c("GO:0033010","paranodal junction", 0.027,-3.371,-5.059, 0.778,-1.3804,0.930,0.000),
-                     c("GO:0045202","synapse", 4.392, 2.587,-6.346, 2.910,-2.6962,0.933,0.000),
-                     c("GO:0098982","GABA-ergic synapse", 0.005, 4.268, 5.999, 0.301,-4.8484,0.688,0.000),
-                     c("GO:1902495","transmembrane transporter complex", 1.736,-5.085, 3.861, 2.508,-8.8705,0.637,0.000),
-                     c("GO:0009986","cell surface", 4.132,-5.832,-3.220, 2.884,-1.3804,0.930,0.003),
-                     c("GO:1902711","GABA-A receptor complex", 0.092,-6.151, 1.414, 1.255,-3.9083,0.806,0.173),
-                     c("GO:0044459","plasma membrane part",14.164,-3.164, 5.596, 3.418,-5.1175,0.762,0.211),
-                     c("GO:0045211","postsynaptic membrane", 1.190, 0.902, 4.718, 2.344,-4.0456,0.410,0.419),
-                     c("GO:0032809","neuronal cell body membrane", 0.103, 2.165, 0.204, 1.301,-1.7453,0.583,0.458),
-                     c("GO:0044224","juxtaparanode region of axon", 0.054, 5.670,-1.670, 1.041,-2.4967,0.653,0.495),
-                     c("GO:0044305","calyx of Held", 0.022, 4.509, 2.435, 0.699,-1.6159,0.521,0.496),
-                     c("GO:0099061","integral component of postsynaptic density membrane", 0.016, 1.145, 5.100, 0.602,-3.8615,0.495,0.621),
-                     c("GO:0098978","glutamatergic synapse", 0.994, 3.253, 6.170, 2.265,-3.3317,0.593,0.661),
-                     c("GO:0098984","neuron to neuron synapse", 1.082, 3.530, 5.837, 2.303,-2.9139,0.591,0.667),
-                     c("GO:0099056","integral component of presynaptic membrane", 0.045, 2.443, 2.855, 0.954,-2.9335,0.424,0.673),
-                     c("GO:0098802","plasma membrane receptor complex", 0.919,-3.210, 2.760, 2.233,-1.9070,0.641,0.680),
-                     c("GO:0036477","somatodendritic compartment", 3.548, 5.132,-1.359, 2.818,-2.9335,0.642,0.684),
-                     c("GO:0017146","NMDA selective glutamate receptor complex", 0.054,-3.728, 2.912, 1.041,-2.8108,0.571,0.684));
+revigo.data <- rbind(c("GO:0030054","cell junction", 6.490, 2.812, 6.269, 3.080,-5.0408,0.934,0.000),
+                     c("GO:0030424","axon", 2.098, 5.331, 1.010, 2.590,-3.1271,0.634,0.000),
+                     c("GO:0033010","paranodal junction", 0.027,-3.194, 5.273, 0.778,-1.3804,0.930,0.000),
+                     c("GO:0045202","synapse", 4.392,-5.742, 3.559, 2.910,-2.6962,0.933,0.000),
+                     c("GO:0098982","GABA-ergic synapse", 0.005, 3.883,-6.151, 0.301,-4.8484,0.688,0.000),
+                     c("GO:1902495","transmembrane transporter complex", 1.736,-5.344,-3.547, 2.508,-8.8705,0.637,0.000),
+                     c("GO:0009986","cell surface", 4.132,-0.440, 6.198, 2.884,-1.3804,0.930,0.003),
+                     c("GO:1902711","GABA-A receptor complex", 0.092,-6.288,-1.051, 1.255,-3.9083,0.806,0.173),
+                     c("GO:0044459","plasma membrane part",14.164,-3.513,-5.373, 3.418,-5.1175,0.762,0.211),
+                     c("GO:0045211","postsynaptic membrane", 1.190, 0.591,-4.697, 2.344,-4.0456,0.410,0.419),
+                     c("GO:0032809","neuronal cell body membrane", 0.103, 2.091,-0.257, 1.301,-1.7453,0.583,0.458),
+                     c("GO:0044224","juxtaparanode region of axon", 0.054, 5.383, 1.604, 1.041,-2.4967,0.653,0.495),
+                     c("GO:0044305","calyx of Held", 0.022, 4.309,-2.600, 0.699,-1.6159,0.521,0.496),
+                     c("GO:0099061","integral component of postsynaptic density membrane", 0.016, 0.814,-5.090, 0.602,-3.8615,0.495,0.621),
+                     c("GO:0098978","glutamatergic synapse", 0.994, 2.862,-6.267, 2.265,-3.3317,0.593,0.661),
+                     c("GO:0098984","neuron to neuron synapse", 1.082, 3.156,-5.948, 2.303,-2.9139,0.591,0.667),
+                     c("GO:0099056","integral component of presynaptic membrane", 0.045, 2.229,-2.918, 0.954,-2.9335,0.424,0.673),
+                     c("GO:0098802","plasma membrane receptor complex", 0.919,-3.415,-2.538, 2.233,-1.9070,0.641,0.680),
+                     c("GO:0036477","somatodendritic compartment", 3.548, 5.687, 0.787, 2.818,-2.9335,0.642,0.684),
+                     c("GO:0017146","NMDA selective glutamate receptor complex", 0.054,-3.941,-2.665, 1.041,-2.8108,0.571,0.684));
+
+one.data.CC.1 <- data.frame(revigo.data);
+names(one.data.CC.1) <- revigo.names;
+one.data.CC.1 <- one.data.CC.1 [(one.data.CC.1$plot_X != "null" & one.data.CC.1$plot_Y != "null"), ];
+one.data.CC.1$plot_X <- as.numeric( as.character(one.data.CC.1$plot_X) );
+one.data.CC.1$plot_Y <- as.numeric( as.character(one.data.CC.1$plot_Y) );
+one.data.CC.1$plot_size <- as.numeric( as.character(one.data.CC.1$plot_size) );
+one.data.CC.1$log10_p_value <- as.numeric( as.character(one.data.CC.1$log10_p_value) );
+one.data.CC.1$frequency <- as.numeric( as.character(one.data.CC.1$frequency) );
+one.data.CC.1$uniqueness <- as.numeric( as.character(one.data.CC.1$uniqueness) );
+one.data.CC.1$dispensability <- as.numeric( as.character(one.data.CC.1$dispensability) );
+#head(one.data.CC.1);
+
+
+
+
+# --------------------------------------------------------------------------
+# Names of the axes, sizes of the numbers and letters, names of the columns,
+# etc. can be changed below
+
+P_1_CC <- ggplot( data = one.data.CC.1 );
+pla3.cc = rev(brewer.pal(9, "OrRd"))[2:5]
+
+P_1_CC = P_1_CC + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
+#P_1_CC = P_1_CC + scale_colour_distiller(palette="Greys")
+#P_1_CC = P_1_CC + scale_color_viridis(option = "F")
+P_1_CC = P_1_CC + scale_color_gradientn(colors = pla3.cc)
+P_1_CC = P_1_CC + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
+P_1_CC =  P_1_CC + xlim(-10,10)
+P_1_CC = P_1_CC + ylim(-10,10)
+P_1_CC = P_1_CC  + theme_bw()
+P_1_CC = P_1_CC + labs (y = "semantic space y", x = "semantic space x")
+p_1_cc_withlegend = P_1_CC + theme(legend.position=c(0.89,0.2),legend.text=element_text(size=8),legend.box="horizontal")
+
+
+
+## LABEL THE CIRCLES
+terms.P_1_CC= one.data.CC.1 [ one.data.CC.1$description %in% c("cell junction",
+                                                               "synapse",
+                                                               "paranodal junction",
+                                                               "cell surface",
+                                                               "GABA-A receptor complex",
+                                                               "plasma membrane part",
+                                                               "calyx of Held"), ]
+
+terms.P_1_CCb= one.data.CC.1 [ one.data.CC.1$description %in% c("neuron to neuron synapse",
+                                                                "postsynaptic membrane",
+                                                                "transmembrane transporter complex",
+                                                                "neuronal cell body membrane",
+                                                                "axon"), ]
+
+
+
 
 ## CHANGE FONT OF THE LABELS
 
@@ -149,15 +200,27 @@ P_1_CC = P_1_CC + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face
 
 P_1_CC;
 
-## SAVE PLOT
-
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_CC.jpeg",
-          P_1_CC ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_CC.jpeg",
+#           P_1_CC ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
 #error message:
 # While parsing your data, warning(s) were encountered:
 # Go term 99240 was not found in the current version of the GeneOntology, dated 22:12:2016 16:59. GO term will be skipped.
 # Go term 98691 was not found in the current version of the GeneOntology, dated 22:12:2016 16:59. GO term will be skipped.
+
+
+
+
+
+
+
+
+
+
+
 
 ##########################################################################################################
 
@@ -207,8 +270,7 @@ p_1_BP = ggplot( data = one.data.BP_1);
 pla3 = rev(brewer.pal(9, "OrRd"))[2:5]
 
 p_1_BP = p_1_BP + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
-#p_1_BP = p_1_BP + scale_colour_distiller(palette="Greys")
-#p_1_BP = p_1_BP + scale_color_viridis(option = "F")
+
 p_1_BP = p_1_BP + scale_color_gradientn(colors = pla3)
 p_1_BP = p_1_BP + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 p_1_BP =  p_1_BP + xlim(-10,10)
@@ -219,19 +281,17 @@ p_1_BP_withlegend = p_1_BP + theme(legend.position=c(0.89,0.2),legend.text=eleme
 
 ## LABEL THE CIRCLES
 
-terms.p_1_BP= one.data.BP_1 [ one.data.BP_1$description %in% c("trans-synaptic signaling",
-                                                               "clustering of voltage-gated potassium channels",
-                                                               "vesicle-mediated transport in synapse",
+terms.p_1_BP= one.data.BP_1 [ one.data.BP_1$description %in% c("vesicle-mediated transport in synapse",
                                                                "ionotropic glutamate receptor signaling pathway"), ]
 
 
 
-terms.p_1_BPb= one.data.BP_1 [ one.data.BP_1$description %in% c("signal release","adult behavior","adult walking behavior",
+terms.p_1_BPb= one.data.BP_1 [ one.data.BP_1$description %in% c("trans-synaptic signaling",
+                                                                "signal release",
+                                                                "adult walking behavior",
                                                                 "central nervous system myelination" , 
                                                                 "sensory perception of pain",
                                                                 "monoamine transport",
-                                                                "inorganic ion transmembrane transport",
-                                                                "inhibitory synapse assembly",
                                                                 "regulation of circadian sleep/wake cycle"), ]
 ## CHANGE FONT OF THE LABELS
 
@@ -245,10 +305,20 @@ p_1_BP = p_1_BP + geom_text( data = terms.p_1_BPb, aes(plot_X, plot_Y, label = d
 p_1_BP = p_1_BP + ggtitle("Gene Ontology Biological Process Threshold >/= 1 TPM")
 p_1_BP = p_1_BP + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face="bold"));p_1_BP
 
-## SAVE PLOT
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
+# library(cowplot)
 
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/p_1_BP.jpeg",
-          p_1_BP ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/p_1_BP.jpeg",
+#           p_1_BP ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+
+
+
+############################################################################################################
+#################################################################################################
+
+
+
+
 
 
 
@@ -287,8 +357,7 @@ P_1_MF <- ggplot( data = one.data.MF.1 );
 pla3.cc = rev(brewer.pal(9, "OrRd"))[2:5]
 
 P_1_MF = P_1_MF + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
-#P_1_MF = P_1_MF + scale_colour_distiller(palette="Greys")
-#P_1_MF = P_1_MF + scale_color_viridis(option = "F")
+
 P_1_MF = P_1_MF + scale_color_gradientn(colors = pla3.cc)
 P_1_MF = P_1_MF + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 P_1_MF =  P_1_MF + xlim(-8.5,9.5)
@@ -299,14 +368,12 @@ P_1_MF_withlegend = P_1_MF + theme(legend.position=c(0.89,0.2),legend.text=eleme
 
 
 ## LABEL THE CIRCLES
-terms.P_1_MF= one.data.MF.1 [ one.data.MF.1$description %in% c("ion gated channel activity",
-                                                               "transmitter-gated channel activity"), ]
+terms.P_1_MF= one.data.MF.1 [ one.data.MF.1$description %in% c("transmitter-gated channel activity"), ]
 
 terms.P_1_MFb= one.data.MF.1 [ one.data.MF.1$description %in% c("transporter activity","beta-amyloid binding",
                                                                 "molecular transducer activity",
                                                                 "glutamate binding",
-                                                                "dopamine binding",
-                                                                "sodium ion transmembrane transporter activity"), ]
+                                                                "dopamine binding"), ]
 
 
 
@@ -324,13 +391,15 @@ P_1_MF = P_1_MF + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face
 
 P_1_MF;
 
-## SAVE PLOT
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_MF.jpeg",
+#            P_1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_1_MF.jpeg",
-          P_1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
-
-################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
 
 
 
@@ -381,8 +450,7 @@ P_0.1_MF <- ggplot( data = one.data.MF_0.1 );
 pla3.cc = rev(brewer.pal(9, "OrRd"))[2:5]
 
 P_0.1_MF = P_0.1_MF + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
-#P_0.1_MF = P_0.1_MF + scale_colour_distiller(palette="Greys")
-#P_0.1_MF = P_0.1_MF + scale_color_viridis(option = "F")
+
 P_0.1_MF = P_0.1_MF + scale_color_gradientn(colors = pla3.cc)
 P_0.1_MF = P_0.1_MF + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 P_0.1_MF =  P_0.1_MF + xlim(-10,10)
@@ -394,13 +462,11 @@ P_0.1_MF_withlegend = P_0.1_MF + theme(legend.position=c(0.89,0.2),legend.text=e
 
 
 ## LABEL THE CIRCLES
-terms.P_0.1_MF= one.data.MF_0.1 [ one.data.MF_0.1$description %in% c("transmitter-gated channel activity",
-                                                                     "ion gated channel activity",
+terms.P_0.1_MF= one.data.MF_0.1 [ one.data.MF_0.1$description %in% c("ion gated channel activity",
                                                                      "molecular transducer activity",
-                                                                     "transporter activity","glutamate receptor activity",
-                                                                     "single-stranded DNA 3'-5' exodeoxyribonuclease activity"), ]
+                                                                     "transporter activity","glutamate receptor activity"), ]
 
-terms.P_0.1_MFb= one.data.MF_0.1[ one.data.MF_0.1$description %in% c("transcription factor activity, sequence-specific DNA binding",
+terms.P_0.1_MFb= one.data.MF_0.1[ one.data.MF_0.1$description %in% c("transmitter-gated channel activity",
                                                                      "acetylcholine binding",
                                                                      "opioid peptide activity"), ]
 
@@ -419,16 +485,21 @@ P_0.1_MF = P_0.1_MF + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,
 
 P_0.1_MF;
 
-## SAVE PLOT
-library(cowplot)
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
 
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_MF.jpeg",
-          P_0.1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
-
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_MF.jpeg",
+#           P_0.1_MF ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
 
 
 ################################################################################
+################################################################################
+
+
+
+
 
 
 
@@ -483,7 +554,7 @@ P_0.1_CC = P_0.1_CC + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, s
 P_0.1_CC = P_0.1_CC + scale_color_gradientn(colors = pla3.cc)
 P_0.1_CC = P_0.1_CC + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 P_0.1_CC =  P_0.1_CC + coord_cartesian(xlim=c(-10,10))
-P_0.1_CC = P_0.1_CC + ylim=c(-10,10)
+P_0.1_CC = P_0.1_CC + ylim(-10,10)
 P_0.1_CC = P_0.1_CC  + theme_bw()
 P_0.1_CC = P_0.1_CC + labs (y = "semantic space y", x = "semantic space x")
 P_0.1_CC_withlegend = P_0.1_CC + theme(legend.position=c(0.89,0.2),legend.text=element_text(size=8),legend.box="horizontal")
@@ -491,17 +562,17 @@ P_0.1_CC_withlegend = P_0.1_CC + theme(legend.position=c(0.89,0.2),legend.text=e
 
 
 ## LABEL THE CIRCLES
-terms.P_0.1_CC= one.data.CC_0.1 [ one.data.CC_0.1$description %in% c("transmembrane transporter complex",
-                                                                     "cell junction",
-                                                                     "somatodendritic compartment"), ]
-
-
-
-
-terms.P_0.1_CCb= one.data.CC_0.1[ one.data.CC_0.1$description %in% c("plasma membrane region",
-                                                                     "neuron to neuron synapse",
+terms.P_0.1_CC= one.data.CC_0.1 [ one.data.CC_0.1$description %in% c("cell junction",
                                                                      "postsynaptic membrane",
-                                                                     "plasma membrane receptor complex"), ]
+                                                                     "neuron to neuron synapse"), ]
+
+
+
+
+terms.P_0.1_CCb= one.data.CC_0.1[ one.data.CC_0.1$description %in% c("transmembrane transporter complex",
+                                                                     "plasma membrane region",
+                                                                     "somatodendritic compartment",
+                                                                     "GABA-A receptor complex"), ]
 
 
 ## CHANGE FONT OF THE LABELS
@@ -518,11 +589,11 @@ P_0.1_CC = P_0.1_CC + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,
 
 P_0.1_CC;
 
-## SAVE PLOT
-library(cowplot)
-
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_CC.jpeg",
-          P_0.1_CC ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_CC.jpeg",
+#           P_0.1_CC ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
 
 
@@ -568,8 +639,7 @@ P_0.1_BP<- ggplot( data = one.data.BP_0.1 );
 pla3.cc = rev(brewer.pal(9, "OrRd"))[2:5]
 
 P_0.1_BP = P_0.1_BP + geom_point( aes( plot_X, plot_Y, colour = log10_p_value, size = plot_size), alpha = I(0.6) ) 
-#P_0.1_BP = P_0.1_BP + scale_colour_distiller(palette="Greys")
-#P_0.1_BP = P_0.1_BP + scale_color_viridis(option = "F")
+
 P_0.1_BP = P_0.1_BP + scale_color_gradientn(colors = pla3.cc)
 P_0.1_BP = P_0.1_BP + scale_size(limits=c(0,5),range=c(1, 15),guide="none")
 P_0.1_BP =  P_0.1_BP + xlim(-10,10)
@@ -597,28 +667,18 @@ P_0.1_BP = P_0.1_BP + geom_text( data = terms.P_0.1_BPb, aes(plot_X, plot_Y, lab
 
 ## ADD TITLE ETC TO PLOT
 
-P_0.1_BP = P_0.1_BP + ggtitle("Gene Ontology Cellular Component Threshold >/= 0.1 TPM")
+P_0.1_BP = P_0.1_BP + ggtitle("Gene Ontology Biological Process Threshold >/= 0.1 TPM")
 P_0.1_BP = P_0.1_BP + theme(plot.title = element_text(hjust=0.5,vjust=1,size=12,face="bold"));P_0.1_BP
 
 P_0.1_BP;
 
-## SAVE PLOT
-library(cowplot)
+## !!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!
 
-save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_BP.jpeg",
-          P_0.1_BP ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
-
+# library(cowplot)
+# 
+# save_plot("./Plots/Human/GENE EXPRESSION ANALYSIS/P_0.1_BP.jpeg",
+#           P_0.1_BP ,base_height= 5.5 ,base_aspect_ratio = 1.5) 
 
 
 
 ################################################################################
-
-
-
-
-
-
-
-
-
-
