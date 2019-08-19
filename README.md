@@ -14,7 +14,6 @@ To run the analysis scripts please download the files as shown in this GITHUB re
 
 ### Prerequisites
 
-```
 R-studio Version 1.2.1335, R software version 3.5.3 and the following R packages are required:
 
 * Core ‘tidyverse’ 1.2.1 (Wickham, 2017) packages:
@@ -41,8 +40,5 @@ R-studio Version 1.2.1335, R software version 3.5.3 and the following R packages
  
  
 
-
-
-```
 
 
