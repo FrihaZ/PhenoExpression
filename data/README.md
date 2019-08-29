@@ -23,6 +23,8 @@ Phenotypes and Gene expression datasets (Human and mouse)
 | MGIgeneExpressionQuery_20190711_073852_WT.txt | MGI WT mice gene expression in all developmental stages  |http://www.informatics.jax.org/gxd ; Data Accessed 11.07.19 |
 | E-ERAD-401-query-results.tpms.tsv | RNA Seq Data for Mice at different developmental stages from Expression Atlas in TPM |https://www.ebi.ac.uk/gxa/experiments/E-ERAD-401/Downloads ; Data Accessed 11.07.19 |
 | mgi.ensembl.genemapping.txt | mapping between mouse gene identifiers | http://www.informatics.jax.org ; MRK_List2 |
+| impc_primary_viability.txt | The Primary Viability data for mouse genes | https://www.mousephenotype.org/ ; Data Accessed  |
+| impc_secondary_viability.txt | The Secondary Viability data for the ‘Window of Lethality’ for mouse genes | https://www.mousephenotype.org/ ; Data Accessed |
 
 
 
