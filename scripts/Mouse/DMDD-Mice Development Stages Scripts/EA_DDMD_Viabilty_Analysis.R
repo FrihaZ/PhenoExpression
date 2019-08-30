@@ -81,18 +81,28 @@ all_mouse_dmdd<-merge(tpm0.1.DMDD.Mouse.gene.expr, tpm1.DMDD.Mouse.gene.expr)
 
 View(all_mouse_dmdd)
 
+##TOTAL NUMBER OF GENES WITH A MP TERM LINKED
 
+all_mouse_dmdd_total<-all_mouse_dmdd%>%
+  select(mp.description, MGI.Accession.ID)%>%
+  distinct(MGI.Accession.ID)
 
-all_mouse_dmdd_num.genes<-all_mouse_dmdd%>%
-  select_all()%>%
-  group_by(mp.description,Development.Stage )%>%
+nrow(all_mouse_dmdd_total)
+  
+### THE TOTAL NUMBER OF GENES FOR EACH MP TERM
+
+all_mouse_dmdd_num.genes_<-all_mouse_dmdd%>%
+  select(mp.description,MGI.Accession.ID)%>%
+  distinct()%>%
+  group_by(mp.description )%>%
   summarise("Number of genes"=n()) %>%
   distinct()
 
-all_mouse_dmdd_num.genes<-aggregate(`Number of genes`~ mp.description, data = all_mouse_dmdd_num.genes, sum)
 
 
-View(all_mouse_dmdd_num.genes)
+
+all_mouse_dmdd_num.genes_$Percent<-(all_mouse_dmdd_num.genes_$`Number of genes`/8799)*100 
+#View(all_mouse_dmdd_num.genes_)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -103,11 +113,11 @@ library(randomcoloR)
 n <-70
 palette <- distinctColorPalette(n)
 
-all_mouse_dmdd_PLOT<-ggplot(all_mouse_dmdd_num.genes, 
-                            aes(x =reorder(all_mouse_dmdd_num.genes$mp.description,
-                                           -all_mouse_dmdd_num.genes$`Number of genes`),
-                                                y =all_mouse_dmdd_num.genes$`Number of genes`,
-                                                  fill=all_mouse_dmdd_num.genes$`Number of genes`))%>%
+all_mouse_dmdd_PLOT<-ggplot(all_mouse_dmdd_num.genes_, 
+                            aes(x =reorder(all_mouse_dmdd_num.genes_$mp.description,
+                                           -all_mouse_dmdd_num.genes_$`Number of genes`),
+                                                y =all_mouse_dmdd_num.genes_$`Number of genes`,
+                                                  fill=all_mouse_dmdd_num.genes_$`Number of genes`))%>%
   
   +labs(x= "Top-Level MP-Term",y="Number of Genes", 
         title= "The Number of Mice Genes for Each Top-Level MP-Term")%>%
@@ -121,25 +131,60 @@ all_mouse_dmdd_PLOT<-ggplot(all_mouse_dmdd_num.genes,
           axis.text.x= element_text(size=10),
           panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
   +geom_bar(stat = "identity")%>%    # to create a stacked barchart
-  +geom_text(show.legend = FALSE,aes(label=all_mouse_dmdd_num.genes$`Number of genes`),size = 5, 
+  +geom_text(show.legend = FALSE,aes(label=all_mouse_dmdd_num.genes_$`Number of genes`),size = 5, 
              position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
   
   + coord_flip()
-  # + scale_color_manual(values =palette, aesthetics = "colour")%>%
-  # +guides(fill=guide_legend(title="Top-Level MP-Term"))
-#+coord_flip()
-
-# +facet_wrap( . ~ Pheno.Mouse.Development$mp.description)
 
 
-all_mouse_dmdd_PLOT
+# all_mouse_dmdd_PLOT
 
-# 
+# !!!!UNHASH TO SAVE PLOT !!!!!!!!!
+
 # library(cowplot)
-# 
+# # 
 # save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/all_mouse_dmdd_PLOT.png"),
 #           all_mouse_dmdd_PLOT ,base_height= 10 ,base_aspect_ratio = 2) 
 # 
+##################
+
+#PERCENTAGE
+
+
+all_mouse_dmdd_PLOT_percent<-ggplot(all_mouse_dmdd_num.genes_, 
+                                    aes(x =reorder(all_mouse_dmdd_num.genes_$mp.description,
+                                                   -all_mouse_dmdd_num.genes_$Percent),
+                                        y =all_mouse_dmdd_num.genes_$Percent,
+                                        fill=all_mouse_dmdd_num.genes_$Percent))%>%
+  
+  +labs(x= "Top-Level MP-Term",y="Percentage (%) of Genes with MP Annotation", 
+        title= "Percentage (%) of Genes Associated to a Top-Level MP Term")%>%
+  + scale_y_continuous(breaks = seq(0, 100, by = 10))%>%
+  +scale_fill_gradient(low = "green", high = "red")%>%
+  + theme(legend.title = element_blank(),
+          legend.position = "none",
+          axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=14, hjust = 0),
+          text = element_text(size=14),
+          axis.text.x= element_text(size=14),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  +geom_text(show.legend = FALSE,aes(label=paste0(round(all_mouse_dmdd_num.genes_$Percent,0),"%")),size = 5, 
+             position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip()
+
+# all_mouse_dmdd_PLOT_percent
+
+#!!!!!!UNHASH TO SAVE PLOT!!!!
+ 
+# library(cowplot)
+# # 
+# save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/all_mouse_dmdd_PLOT_percent.png"),
+#           all_mouse_dmdd_PLOT_percent ,base_height= 10 ,base_aspect_ratio = 2) 
+# 
+
+
 
 ##################################################################################################
 #################################################################################################################
@@ -183,7 +228,7 @@ Count_Primary<-primary_viability_mouse_dmdd%>%
 
 View(Count_Primary)
 
-#save df
+##UNHASH TO SAVE DF
 
 #write.csv(primary_viability_mouse_dmdd,
 #"D:/MSC RESEARCH PROJECT/Output_Files/Mice/EA_DMDDs DATASET/Viability/primary_viability_mouse_dmdd.csv")
@@ -261,7 +306,8 @@ primary_viability_mouse_dmdd_CLEANED <- primary_viability_mouse_dmdd[!primary_vi
 
 View(primary_viability_mouse_dmdd_CLEANED)
 
-# 
+# #UNHASH TO SAVE DF  
+
 # write.csv(primary_viability_mouse_dmdd_CLEANED,
 #           "D:/MSC RESEARCH PROJECT/Output_Files/Mice/EA_DMDDs DATASET/Viability/primary_viability_mouse_dmdd_CLEANED.csv")
 # ###
@@ -291,8 +337,6 @@ primary_via_mouse_PLOT3_CLEANED<-ggplot(primary_viability_mouse_dmdd_CLEANED,
   +geom_point(size = 4)%>%
   + scale_color_manual(values =palette2, aesthetics = "colour")%>%
   +guides(color=guide_legend(title="Viabilty: "))%>%
-  #+ xlim(rev(levels(primary_viability_mouse_dmdd$Development.Stage)))%>%
-  #+coord_flip()
   +facet_wrap( . ~ primary_viability_mouse_dmdd_CLEANED$IMPC_Viability)
 
 
@@ -490,6 +534,7 @@ primary_viability_mouse_dmdd_PLOT2<-ggplot(primary_viability_mouse_dmdd,
 
 # primary_viability_mouse_dmdd_PLOT2
 
+#UNHASH TO SAVE PLOT  
 
 # # 
 # library(cowplot)
@@ -614,12 +659,13 @@ MEAN_second_viability_mouse_dmdd_plot<-ggplot(SE_mean_second_viability_mouse_dmd
 
 #primary_viability_mouse_dmdd_PLOT
 
-# 
-# # 
-library(cowplot)
-# # 
-save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Viability/MEAN_second_viability_mouse_dmdd_plot.png"),
-            MEAN_second_viability_mouse_dmdd_plot ,base_height= 10 ,base_aspect_ratio = 2) 
+ 
+# !!!!!!UNHASH TO SAVE PLOT  !!!!!!!!111
+
+# library(cowplot)
+ 
+# save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Viability/MEAN_second_viability_mouse_dmdd_plot.png"),
+#             MEAN_second_viability_mouse_dmdd_plot ,base_height= 10 ,base_aspect_ratio = 2) 
 
 ################################################################################
 ## Mean +SD 
@@ -703,18 +749,4 @@ MEAN_second_viability_mouse_dmdd_plot1_SE<-ggplot(SE_mean_second_viability_mouse
 
 ############################################################################################################################
 ##########################################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
