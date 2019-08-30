@@ -48,8 +48,15 @@ MGI_ALL_TS_knockout<-MGI_ALL_TS_knockout_%>%
   distinct(MGI.ID,Structure,ALL.TS.expression.detected, `Theiler Stage`) %>% # check again for duplicated rows
   mutate(Gene.Anatomy = paste0(MGI.ID,"-",Structure)) # create a new variable (Gene - Anatomy (Structure) term)
 
-
 View(MGI_ALL_TS_knockout)
+
+## count number of KO genes
+count_MGI_ALL_TS_knockout<-ungroup(MGI_ALL_TS_knockout)%>%
+  select(MGI.ID)%>%
+  drop_na()%>%
+  distinct()
+
+nrow(count_MGI_ALL_TS_knockout)
 
 #write.csv(MGI_ALL_TS_knockout, "D:/MSC RESEARCH PROJECT/Output_Files/Mice/MGI_ALL_TS_knockout.csv")
 
@@ -81,7 +88,7 @@ MGI_ALL_TS_knockout_All$Structure<-as.factor(MGI_ALL_TS_knockout_All$Structure )
 cols  <- c(
   "Yes" = "Green",
   "No" = "Red",
-  "Ambiguous_NotSpecified_Contradictory" = "Grey",
+  "Ambiguous" = "Grey",
   na.value  = "Black")
 
 MGI_ALL_TS_knockout_All_p1<-ggplot(MGI_ALL_TS_knockout_All, aes(x =MGI_ALL_TS_knockout_All$MGI.ID, 
@@ -186,33 +193,33 @@ Heatmap_Structure_Gene<-function(strctr, MGI_ALL_TS,GENO){
 # 
 # # !!!!!!! UNHASH TO USE THE FOR-LOOP !!!!!!!!!!
 # 
-for(i in 1:nrow(list_structures)) {
-  ii <- list_structures[i,1]     #FIRST COLUMN
-  print(ii) # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-
-  a= ii 
-    
-    
-    
-  MGI_ALL_TS_knockout_1_p2<-Heatmap_Structure_Gene(strctr=ii, MGI_ALL_TS=MGI_ALL_TS_knockout, GENO="KO")
-     
-    
-   # REMOVE SPACES, /, -, SO THAT THE FILE CAN BE SAVED 
-    
-  a<-gsub(" ", "_", ii, fixed=TRUE)
-  a<-gsub("/", "_", a, fixed=TRUE)
-  a<-gsub("-", "_", a, fixed=TRUE)
-#    
-  print(a)
+# for(i in 1:nrow(list_structures)) {
+#   ii <- list_structures[i,1]     #FIRST COLUMN
+#   print(ii) # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
 # 
-      #SAVE PLOT----CHANGE LOCATION!
-  library(cowplot)
-    
-  save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Heatmap/", a,".pdf"),
-            MGI_ALL_TS_knockout_1_p2 ,base_height= 5.5 ,base_aspect_ratio = 2) 
-   
-  
-}
+#   a= ii 
+#     
+#     
+#     
+#   MGI_ALL_TS_knockout_1_p2<-Heatmap_Structure_Gene(strctr=ii, MGI_ALL_TS=MGI_ALL_TS_knockout, GENO="KO")
+#      
+#     
+#    # REMOVE SPACES, /, -, SO THAT THE FILE CAN BE SAVED 
+#     
+#   a<-gsub(" ", "_", ii, fixed=TRUE)
+#   a<-gsub("/", "_", a, fixed=TRUE)
+#   a<-gsub("-", "_", a, fixed=TRUE)
+# #    
+#   print(a)
+# # 
+#       #SAVE PLOT----CHANGE LOCATION!
+#   library(cowplot)
+#     
+#   save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Heatmap/", a,".pdf"),
+#             MGI_ALL_TS_knockout_1_p2 ,base_height= 5.5 ,base_aspect_ratio = 2) 
+#    
+#   
+# }
 
 
 
@@ -236,46 +243,43 @@ for(i in 1:nrow(list_structures)) {
 
 Genes_Structure<-ungroup(MGI_ALL_TS_knockout)%>%
   select(Structure, MGI.ID, ALL.TS.expression.detected)%>%
-  group_by(Structure, MGI.ID, ALL.TS.expression.detected )%>%
-  summarise('Number.of.Genes'= n())%>%
-  distinct(Structure, MGI.ID, Number.of.Genes, ALL.TS.expression.detected  )
+  distinct()%>%
+  group_by(Structure, ALL.TS.expression.detected)%>%
+  summarise(Number.of.Genes=n()) %>%
+  mutate('Percentage' = Number.of.Genes/sum(Number.of.Genes)*100)%>%
+  distinct(Structure, ALL.TS.expression.detected, Number.of.Genes,Percentage)
 
-Genes_Structure_sum<-aggregate(Genes_Structure$Number.of.Genes , 
-                        by=list(Structure=Genes_Structure$Structure, 
-                                ALL.TS.expression.detected=Genes_Structure$ALL.TS.expression.detected)
-                        , FUN=sum)
-
-Genes_Structure_sum$Structure<- as.character(Genes_Structure_sum$Structure)
-
-Genes_Structure_sum_sorted<-Genes_Structure_sum[order(Genes_Structure_sum$Structure),]
-
-View(Genes_Structure_sum_sorted)
+View(Genes_Structure)
 
 
 ### CREATE PLOT WITH HIGHEST AND SMALLEST NUMBER OF GENES
 
-Genes_Structure_sum_sorted_high_low<-Genes_Structure_sum_sorted%>%
+Genes_Structure_sum_sorted_high_low<-Genes_Structure%>%
   select_all()%>%
   filter(Structure =="embryo"|
-           Structure =="1st branchial arch endoderm"| 
-           Structure=="midbrain"|
-           Structure=="spinal cord"|
-           Structure=="heart" | 
-           Structure =="liver"| 
-           Structure== "lung" | 
-           Structure=="1-cell stage embryo")%>%
+           Structure =="heart"| 
+           Structure=="lung"|
+           Structure=="liver"|
+           Structure=="brain" | 
+           Structure =="metanephros"| 
+           Structure== "neural tube" | 
+           Structure=="cerebral cortex"|
+           Structure=="telencephalon"|
+           Structure== "forelimb bud"|
+           Structure=="spinal cord")%>%
   distinct()
 
 
 
 
 library(ggplot2)
-Genes_Structure_sum_high_low<-ggplot(Genes_Structure_sum_sorted_high_low, aes(fill=Genes_Structure_sum_sorted_high_low$ALL.TS.expression.detected, 
-                                            y=Genes_Structure_sum_sorted_high_low$x,
-                                            x= reorder(Genes_Structure_sum_sorted_high_low$Structure,-Genes_Structure_sum_sorted_high_low$x) ))%>% 
+Genes_Structure_sum_high_low<-ggplot(Genes_Structure_sum_sorted_high_low, 
+                                     aes(fill=Genes_Structure_sum_sorted_high_low$ALL.TS.expression.detected, 
+                                            y=Genes_Structure_sum_sorted_high_low$Percentage,
+                                            x= reorder(Genes_Structure_sum_sorted_high_low$Structure,-Genes_Structure_sum_sorted_high_low$Percentage ) ))%>% 
   
-  + labs(x= "Structure", y="Number of Genes", 
-         subtitle=paste("Number of Genes Detected for Each Structure for KO Mice"))%>%
+  + labs(x= "Structure", y="Percentage of Genes (%)", 
+         subtitle=paste("Percentage of Genes Detected for Each Structure for KO Mice"))%>%
   + guides(fill=guide_legend(title="Gene Expression: ")) %>%
   +theme(axis.title=element_text(size=14,face="bold"),
          plot.caption=element_text(face = "italic", size=12, hjust = 0),
@@ -285,22 +289,21 @@ Genes_Structure_sum_high_low<-ggplot(Genes_Structure_sum_sorted_high_low, aes(fi
          axis.text.y= element_text(size=10),
          axis.text.x= element_text(size=10, angle = 45, hjust = 1, vjust = 1),
          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  + scale_y_continuous(breaks = seq(0, 3000, by = 200))%>%
+  + scale_y_continuous(breaks = seq(0, 100, by = 20))%>%
   +geom_bar(stat="identity") %>%
-  +geom_text(aes(label=Genes_Structure_sum_sorted_high_low$x),size = 2, position = position_stack(vjust = 0.5),
-             colour=c("black"), fontface='bold') #%>%
-#  +coord_flip()
+  +geom_text(aes(label=paste0(round(Genes_Structure_sum_sorted_high_low$Percentage,0),"%")),size = 4, position = position_stack(vjust = 0.5),
+             colour=c("black"), fontface='bold') 
 
 Genes_Structure_sum_high_low
 
 
 # UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!!
 # # 
+# # # # # 
+# library(cowplot)
+# save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Structure/Genes_Structure_sum_high_low.png"),
+#         Genes_Structure_sum_high_low ,base_height= 6 ,base_aspect_ratio = 1) 
 # # # # 
-library(cowplot)
-save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Structure/Genes_Structure_sum_high_low.png"),
-         Genes_Structure_sum_high_low ,base_height= 6 ,base_aspect_ratio = 1) 
-# # # 
 # 
 
 
@@ -360,9 +363,9 @@ Genes_TS_sum_p1
 # UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!!
 # 
 # 
-library(cowplot)
-save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Theiler_Stages/Each_TS.png"),
-           Genes_TS_sum_p1 ,base_height= 5.5 ,base_aspect_ratio = 2) 
+# library(cowplot)
+# save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Theiler_Stages/Each_TS.png"),
+#            Genes_TS_sum_p1 ,base_height= 5.5 ,base_aspect_ratio = 2) 
 # 
 
 
@@ -418,7 +421,7 @@ save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/KO/Theiler_Stages/Ea
 
 
 
-MGI_ALL_TS_WT<-MGI_ALL_TS_WT%>%
+MGI_ALL_TS_WT_<-MGI_ALL_TS_WT%>%
   select(`MGI Gene ID` ,Structure,Detected, `Theiler Stage`) %>% # select columns of interest 
   # we will try to always use MGI IDs for mouse genes / HGNC ids for human genes (these are stable identifiers)
   distinct(`MGI Gene ID`, Structure,Detected, `Theiler Stage`) %>% # retain unique rows
@@ -427,7 +430,7 @@ MGI_ALL_TS_WT<-MGI_ALL_TS_WT%>%
   summarise(Detected_all = paste0(Detected,collapse="|")) %>% ## collpase all the expression data availabe for a given
   # gene and tissue  in one cell
   mutate(Detected_all = ifelse(Detected_all =="No","No",
-                               ifelse(Detected_all == "Yes","Yes","Ambiguous_NotSpecified_Contradictory"))) %>%
+                               ifelse(Detected_all == "Yes","Yes","Ambiguous"))) %>%
   # recode variable based on values 
   rename(MGI.ID = `MGI Gene ID`, ALL.TS.expression.detected = Detected_all) %>% ## rename variables
   select(MGI.ID,Structure,ALL.TS.expression.detected, `Theiler Stage`) %>% # select columns of interest
@@ -435,11 +438,20 @@ MGI_ALL_TS_WT<-MGI_ALL_TS_WT%>%
   mutate(Gene.Anatomy = paste0(MGI.ID,"-",Structure)) # create a new variable (Gene - Anatomy (Structure) term)
 
 
-View(MGI_ALL_TS_WT)
+View(MGI_ALL_TS_WT_)
+
+
+
+count_MGI_ALL_TS_WT_<-ungroup(MGI_ALL_TS_WT_)%>%
+  select(MGI.ID)%>%
+  drop_na()%>%
+  distinct()
+
+nrow(count_MGI_ALL_TS_WT_)
 
 
 ## UNHASH TO SAVE CSV
-#write.csv(MGI_ALL_TS_WT, "D:/MSC RESEARCH PROJECT/Output_Files/Mice/MGI_ALL_TS_WT.csv")
+#write.csv(MGI_ALL_TS_WT_, "D:/MSC RESEARCH PROJECT/Output_Files/Mice/MGI_ALL_TS_WT.csv")
 
 ################################################################################################################################
 ################################################################################################################################
@@ -448,38 +460,39 @@ View(MGI_ALL_TS_WT)
 
 
 #per gene, embryonic stage and tissue the number of  Yes / No in order to classify each gene /embryonic stage / tissue as Yes/No/Ambiguous.
-WT_list_structures<- ungroup(MGI_ALL_TS_WT)%>%
+WT_list_structures<- ungroup(MGI_ALL_TS_WT_)%>%
   select(Structure)%>%
   distinct()
 
 View(WT_list_structures)
 
 
-MGI_ALL_TS_WT_All<- MGI_ALL_TS_WT %>%
+MGI_ALL_TS_WT__All<- MGI_ALL_TS_WT_ %>%
   select(MGI.ID ,Structure,ALL.TS.expression.detected,
          `Theiler Stage` )%>%
   distinct()
 
-View(MGI_ALL_TS_WT)
+View(MGI_ALL_TS_WT_)
 
-MGI_ALL_TS_WT_All$MGI.ID<-as.factor(MGI_ALL_TS_WT_All$MGI.ID )
+MGI_ALL_TS_WT__All$MGI.ID<-as.factor(MGI_ALL_TS_WT__All$MGI.ID )
 
-MGI_ALL_TS_WT_All$Structure<-as.factor(MGI_ALL_TS_WT_All$Structure )
+MGI_ALL_TS_WT__All$Structure<-as.factor(MGI_ALL_TS_WT__All$Structure )
 
+View(MGI_ALL_TS_WT__All)
 
-View(MGI_ALL_TS_WT_All)
+#########################################################################################################################
+
 # Build the heat map from scratch
 
-View(MGI_ALL_TS_WT_All)
 
 cols  <- c(
   "Yes" = "Green",
   "No" = "Red",
-  "Ambiguous_NotSpecified_Contradictory" = "Black",
+  "Ambiguous" = "Black",
   na.value  = "Grey")
 
-MGI_ALL_TS_WT_All_P1<-ggplot(MGI_ALL_TS_WT_All, aes(x =MGI_ALL_TS_WT_All$MGI.ID, 
-                                                                y =MGI_ALL_TS_WT_All$Structure ))%>%
+MGI_ALL_TS_WT__All_P1<-ggplot(MGI_ALL_TS_WT__All, aes(x =MGI_ALL_TS_WT__All$MGI.ID, 
+                                                                y =MGI_ALL_TS_WT__All$Structure ))%>%
   +labs(x= "MGI.ID", y="Structure", 
         subtitle= "WT Mice Developmental Gene Expression in Each Structure for Each Theiler Stage")%>%
   +theme(axis.title=element_text(size=10,face="bold"),
@@ -492,14 +505,14 @@ MGI_ALL_TS_WT_All_P1<-ggplot(MGI_ALL_TS_WT_All, aes(x =MGI_ALL_TS_WT_All$MGI.ID,
          panel.border = element_rect(colour = "black", fill=NA, size=1),
          panel.background = element_rect(fill = 'lightgrey')) %>%
   + guides(fill=guide_legend(title="Gene Expression: ")) %>%
-  +geom_tile(aes(fill = MGI_ALL_TS_WT_All$ALL.TS.expression.detected)) %>%
+  +geom_tile(aes(fill = MGI_ALL_TS_WT__All$ALL.TS.expression.detected)) %>%
   +scale_fill_manual(values = cols, na.value = "Grey") %>%# Adjust colors
-  +facet_wrap( . ~ MGI_ALL_TS_WT_All$`Theiler Stage`)%>% # Facet layer
+  +facet_wrap( . ~ MGI_ALL_TS_WT__All$`Theiler Stage`)%>% # Facet layer
   +coord_flip()
 
 
 
-MGI_ALL_TS_WT_All_P1
+MGI_ALL_TS_WT__All_P1
 
 
 
@@ -507,10 +520,10 @@ MGI_ALL_TS_WT_All_P1
 # UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!!
 # 
 # # 
-# library(cowplot)
-save_plot("./Plots/Mouse/MGI GXD Developmental Stages/WT/Heatmap/MGI_ALL_TS_WT_All_P1.png",
-         MGI_ALL_TS_WT_All_P1 ,base_height= 6 ,base_aspect_ratio = 3) 
-# # # 
+# # library(cowplot)
+# save_plot("./Plots/Mouse/MGI GXD Developmental Stages/WT/Heatmap/MGI_ALL_TS_WT__All_P1.png",
+#          MGI_ALL_TS_WT__All_P1 ,base_height= 6 ,base_aspect_ratio = 3) 
+# # # # 
 
 
 
@@ -526,32 +539,32 @@ save_plot("./Plots/Mouse/MGI GXD Developmental Stages/WT/Heatmap/MGI_ALL_TS_WT_A
 
 # # !!!!!!! UNHASH TO USE THE FOR-LOOP !!!!!!!!!!
 # 
-for(t in 1:nrow(WT_list_structures)) {
-  tt <- WT_list_structures[t,1]     #FIRST COLUMN
-  print(tt) # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+# for(t in 1:nrow(WT_list_structures)) {
+#   tt <- WT_list_structures[t,1]     #FIRST COLUMN
+#   print(tt) # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
+# #  
+# #    b= tt
+# #    
+# #    
+# #    
+#   MGI_ALL_TS_WT__1_p2<-Heatmap_Structure_Gene(strctr=tt, MGI_ALL_TS=MGI_ALL_TS_WT_, GENO="KO")
+# #     
+# #    
+# #     # REMOVE SPACES, /, -, SO THAT THE FILE CAN BE SAVED 
+# #    
+#   tb<-gsub(" ", "_", tt, fixed=TRUE)
+#   tb<-gsub("/", "_", tb, fixed=TRUE)
+#   tb<-gsub("-", "_", tb, fixed=TRUE)
+#   
+#   print(tb)
+# # 
+# # # SAVE PLOT----CHANGE LOCATION!
+#   library(cowplot)
 #  
-#    b= tt
-#    
-#    
-#    
-  MGI_ALL_TS_WT_1_p2<-Heatmap_Structure_Gene(strctr=tt, MGI_ALL_TS=MGI_ALL_TS_WT, GENO="KO")
+#   save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Heatmap/", tb,".pdf"),
+#             MGI_ALL_TS_WT__1_p2 ,base_height= 5.5 ,base_aspect_ratio = 2) 
 #     
-#    
-#     # REMOVE SPACES, /, -, SO THAT THE FILE CAN BE SAVED 
-#    
-  tb<-gsub(" ", "_", tt, fixed=TRUE)
-  tb<-gsub("/", "_", tb, fixed=TRUE)
-  tb<-gsub("-", "_", tb, fixed=TRUE)
-  
-  print(tb)
-# 
-# # SAVE PLOT----CHANGE LOCATION!
-  library(cowplot)
- 
-  save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Heatmap/", tb,".pdf"),
-            MGI_ALL_TS_WT_1_p2 ,base_height= 5.5 ,base_aspect_ratio = 2) 
-    
- }
+#  }
 
 
 
@@ -572,40 +585,32 @@ for(t in 1:nrow(WT_list_structures)) {
 
 ###~~~~~~~~~~~~~~~~~~~~~~~~~~Number of Genes Detected for Each Structure! ~~~~~~~~~#######################
 
-WT_Genes_Structure<-ungroup(MGI_ALL_TS_WT)%>%
-  select(Structure, MGI.ID, ALL.TS.expression.detected)%>%
-  group_by(Structure, MGI.ID, ALL.TS.expression.detected )%>%
-  summarise('Number.of.Genes'= n())%>%
-  distinct(Structure, MGI.ID, Number.of.Genes, ALL.TS.expression.detected  )
+WT_Genes_Structure<-MGI_ALL_TS_WT_%>%
+  select(Structure, MGI.ID , ALL.TS.expression.detected)%>%
+  distinct()%>%
+  group_by(Structure, ALL.TS.expression.detected)%>%
+  summarise(Number.of.Genes=n()) %>%
+  mutate('Percentage' = Number.of.Genes/sum(Number.of.Genes)*100)%>%
+  distinct(Structure, ALL.TS.expression.detected, Number.of.Genes,Percentage)
 
-WT_Genes_Structure_sum<-aggregate(WT_Genes_Structure$Number.of.Genes , 
-                               by=list(Structure=WT_Genes_Structure$Structure, 
-                                       ALL.TS.expression.detected=WT_Genes_Structure$ALL.TS.expression.detected)
-                               , FUN=sum)
-
-View(WT_Genes_Structure_sum)
-
-WT_Genes_Structure_sum$Structure<- as.character(WT_Genes_Structure_sum$Structure)
-
-WT_Genes_Structure_sum<-WT_Genes_Structure_sum[order(WT_Genes_Structure_sum$Structure),]
-
-View(WT_Genes_Structure_sum)
-
+View(WT_Genes_Structure)
 ####################################################################################################################
 ##############################################################################################################
 
 ### CREATE PLOT WITH HIGHEST AND SMALLEST NUMBER OF GENES
 
-WT_Genes_Structure_sum_high_low<-WT_Genes_Structure_sum%>%
+WT_Genes_Structure_sum_high_low<-WT_Genes_Structure%>%
   select_all()%>%
-  filter(Structure =="embryo"|
-           Structure =="1st branchial arch endoderm"| 
-           Structure=="midbrain"|
-           Structure=="spinal cord"|
-           Structure=="heart" | 
-           Structure =="liver"| 
-           Structure== "lung" | 
-           Structure=="1-cell stage embryo")%>%
+  filter(Structure =="brain"|
+           Structure =="spinal cord"| 
+           Structure=="embryo"|
+           Structure=="metanephros"|
+           Structure=="cerebral cortex"|
+           Structure=="lung" | 
+           Structure =="midbrain"| 
+           Structure== "testis" | 
+           Structure=="liver"|
+           Structure== "heart")%>%
   distinct()
 
 View(WT_Genes_Structure_sum_high_low)
@@ -616,11 +621,11 @@ View(WT_Genes_Structure_sum_high_low)
 library(ggplot2)
 WT_Genes_Structure_sum_high_low_P1<-ggplot(WT_Genes_Structure_sum_high_low, 
                                         aes(fill=WT_Genes_Structure_sum_high_low$ALL.TS.expression.detected, 
-                                                                       y=WT_Genes_Structure_sum_high_low$x,
-                                                                       x= reorder(WT_Genes_Structure_sum_high_low$Structure,-WT_Genes_Structure_sum_high_low$x) ))%>% 
+                                                                       y=WT_Genes_Structure_sum_high_low$Percentage ,
+                                                                       x= reorder(WT_Genes_Structure_sum_high_low$Structure,-WT_Genes_Structure_sum_high_low$Percentage ) ))%>% 
   
-  + labs(x= "Structure", y="Number of Genes", 
-         subtitle=paste("Number of Genes Detected for Each Structure for WT Mice"))%>%
+  + labs(x= "Structure", y="Percentage of Genes (%)", 
+         subtitle=paste("Percentage of Genes Detected for Each Structure for WT Mice"))%>%
   + guides(fill=guide_legend(title="Gene Expression: ")) %>%
   +theme(axis.title=element_text(size=14,face="bold"),
          plot.caption=element_text(face = "italic", size=12, hjust = 0),
@@ -630,22 +635,22 @@ WT_Genes_Structure_sum_high_low_P1<-ggplot(WT_Genes_Structure_sum_high_low,
          axis.text.y= element_text(size=10),
          axis.text.x= element_text(size=10, angle = 45, hjust = 1, vjust = 1),
          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  + scale_y_continuous(breaks = seq(0, 20000, by = 1000))%>%
-  +geom_bar(stat="identity") %>%
-  +geom_text(aes(label=WT_Genes_Structure_sum_high_low$x),size = 2, position = position_stack(vjust = 0.5),
-             colour=c("black"), fontface='bold') #%>%
-#  +coord_flip()
+  + scale_y_continuous(breaks = seq(0, 100, by = 20))%>%
+  +geom_bar(stat="identity") %>%  
+  +geom_text(aes(label=paste0(round(WT_Genes_Structure_sum_high_low$Percentage,0),"%")),size = 4, position = position_stack(vjust = 0.5),
+             colour=c("black"), fontface='bold') 
 
-WT_Genes_Structure_sum_high_low_P1
+
+#WT_Genes_Structure_sum_high_low_P1
 
 
 # UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!!
 # # 
-# # # 
-library(cowplot)
-save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Structure/WT_Genes_Structure_sum_high_low.png"),
-          WT_Genes_Structure_sum_high_low_P1 ,base_height= 6 ,base_aspect_ratio = 1) 
-# # 
+# # # # 
+# library(cowplot)
+# save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Structure/WT_Genes_Structure_sum_high_low.png"),
+#          WT_Genes_Structure_sum_high_low_P1 ,base_height= 6 ,base_aspect_ratio = 1) 
+# # # # 
 
 
 
@@ -657,16 +662,17 @@ save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Structure/WT_Gene
 
 ###~~~~~~~~~~~~~~~~~~~~~~~~~~Number of Genes Detected for Each TS! ~~~~~~~~~#######################
 
-View(MGI_ALL_TS_WT)
-MGI_ALL_TS_WT<-ungroup(MGI_ALL_TS_WT)%>%
+View(MGI_ALL_TS_WT_)
+MGI_ALL_TS_WT_<-ungroup(MGI_ALL_TS_WT_)%>%
   select(`Theiler Stage`, MGI.ID, ALL.TS.expression.detected)%>%
-  group_by(`Theiler Stage`, MGI.ID, ALL.TS.expression.detected )%>%
+  distinct()%>%
+  group_by(`Theiler Stage`, ALL.TS.expression.detected )%>%
   summarise('Number.of.Genes'= n())%>%
   distinct(`Theiler Stage`, MGI.ID, Number.of.Genes, ALL.TS.expression.detected  )
 
-WT_Genes_TS_sum<-aggregate(MGI_ALL_TS_WT$Number.of.Genes , 
-                        by=list(Theiler.Stage=MGI_ALL_TS_WT$`Theiler Stage`, 
-                                ALL.TS.expression.detected=MGI_ALL_TS_WT$ALL.TS.expression.detected)
+WT_Genes_TS_sum<-aggregate(MGI_ALL_TS_WT_$Number.of.Genes , 
+                        by=list(Theiler.Stage=MGI_ALL_TS_WT_$`Theiler Stage`, 
+                                ALL.TS.expression.detected=MGI_ALL_TS_WT_$ALL.TS.expression.detected)
                         , FUN=sum)
 
 View(WT_Genes_TS_sum)
@@ -696,14 +702,14 @@ WT_Genes_TS_sum_p1<-ggplot(WT_Genes_TS_sum, aes(fill=WT_Genes_TS_sum$ALL.TS.expr
              colour=c("black"), fontface='bold')%>%
   +coord_flip()
 
-WT_Genes_TS_sum_p1
+#WT_Genes_TS_sum_p1
 
 
 # UNHASH TO SAVE PLOT!!!!!!!!!!!!!!!!!
 # 
-# 
-library(cowplot)
-save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Theiler_Stages/Each_TS.png"),
-          WT_Genes_TS_sum_p1 ,base_height= 5.5 ,base_aspect_ratio = 2) 
-# 
+# # # 
+# library(cowplot)
+# save_plot(paste("./Plots/Mouse/MGI GXD Developmental Stages/WT/Theiler_Stages/Each_TS.png"),
+#            WT_Genes_TS_sum_p1 ,base_height= 5.5 ,base_aspect_ratio = 2) 
+
 
