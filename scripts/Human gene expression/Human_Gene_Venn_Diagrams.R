@@ -13,7 +13,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);library(tidyverse);library(ggpubr)
+library(dplyr);library(tidyr);library(readr);library(tidyverse);library(ggpubr)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -91,7 +91,7 @@ ADJ.SIGN.PVALUE.Greater0<- PVALUE_GENE_Greater0 %>%
 
 View(ADJ.SIGN.PVALUE.Greater0)
 
-#write.csv(ADJ.SIGN.PVALUE.Greater0,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE.Greater0.csv')
+write.csv(ADJ.SIGN.PVALUE.Greater0,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE.Greater0.csv')
 
 
 
@@ -104,7 +104,7 @@ ADJ.SIGN.PVALUE_0.1<- PVALUE_GENE_0.1 %>%
 
 View(ADJ.SIGN.PVALUE_0.1)
 
-#write.csv(ADJ.SIGN.PVALUE_0.1,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE_0.1.csv')
+write.csv(ADJ.SIGN.PVALUE_0.1,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE_0.1.csv')
 
 
 
@@ -117,7 +117,7 @@ ADJ.SIGN.PVALUE_1<- PVALUE_GENE_1 %>%
 
 View(ADJ.SIGN.PVALUE_1)
 
-#write.csv(ADJ.SIGN.PVALUE_1,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE_1.csv')
+write.csv(ADJ.SIGN.PVALUE_1,'./Output_Files/Human/Adjusted_Significant_PValues/ADJ.SIGN.PVALUE_1.csv')
 
 
 
@@ -145,7 +145,7 @@ All.Sign.Genes<- qpcR:::cbind.na(SIGN.PVALUE.Greater0,
 View(All.Sign.Genes)
 
 
-#write.csv(All.Sign.Genes,'./Output_Files/Human/Adjusted_Significant_PValues/ALL.ADJ.SIGN.Genes.csv')
+write.csv(All.Sign.Genes,'./Output_Files/Human/Adjusted_Significant_PValues/ALL.ADJ.SIGN.Genes.csv')
 
 
 
@@ -154,12 +154,13 @@ library(VennDiagram)
 library(grid)
 
 
-vp <- venn.diagram(list("TPM >/= 0.1 TPM"= SIGN.PVALUE_0.1, 
+vp <- venn.diagram(list("TPM >0 TPM"=SIGN.PVALUE.Greater0, 
+                       "TPM >/= 0.1 TPM"= SIGN.PVALUE_0.1, 
                        "TPM >/= 1 TPM"=SIGN.PVALUE_1),
-                   fill = c("seagreen3", "orchid3"),
+                   fill = c("goldenrod1","seagreen3", "orchid3"),
                    alpha = 0.5, filename = NULL, cex = 1, 
-                   counts.col = "red", euler= TRUE,cat.cex = 1,
-                   scaled= FALSE, margin = 0.05, cat.pos = c(-0.2, 0.2));
+                   counts.col = "red", euler= TRUE,cat.cex = 2,
+                   scaled= FALSE, margin = 0.05);
 grid.draw(vp)
 
 library(grDevices)
