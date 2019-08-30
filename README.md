@@ -12,6 +12,9 @@ This project aims to link genotype, gene expression as well as the organism's ph
 
 To run the analysis scripts please download the files as shown in this GITHUB repository.
 
+For the  'hgnc_symbol_checker.R' created by Dr Pilar Cacheiro please fork and download the repository from : https://github.com/FrihaZ/Gene-symbol-checker 
+
+
 ### Prerequisites
 
 R-studio Version 1.2.1335, R software version 3.5.3 and the following R packages are required:
