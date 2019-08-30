@@ -25,7 +25,7 @@ R-studio Version 1.2.1335, R software version 3.5.3 and the following R packages
   * 'ggplot2' 0.8.1 
   * 'readr' 1.3.1 
   
- * Data curation:
+* Data curation:
   * 'magrittr' 1.5 
   * 'gtools' 3.8.1
   * 'reshape2' 1.4.3
