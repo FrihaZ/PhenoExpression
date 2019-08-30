@@ -1,0 +1,59 @@
+"","mp.description","Mutant.WT.Expression","Frequency","Percentage"
+"1","adipose tissue phenotype","Yes-Yes",6,100
+"2","cardiovascular system phenotype","No-Yes",18,17.4757281553398
+"3","cardiovascular system phenotype","Yes-Yes",85,82.5242718446602
+"4","cellular phenotype","No-No",1,7.14285714285714
+"5","cellular phenotype","No-Yes",3,21.4285714285714
+"6","cellular phenotype","Yes-No",1,7.14285714285714
+"7","cellular phenotype","Yes-Yes",9,64.2857142857143
+"8","craniofacial phenotype","No-Yes",4,16
+"9","craniofacial phenotype","Yes-Yes",21,84
+"10","digestive/alimentary phenotype","No-Yes",1,9.09090909090909
+"11","digestive/alimentary phenotype","Yes-Yes",10,90.9090909090909
+"12","embryo phenotype","No-No",1,0.714285714285714
+"13","embryo phenotype","No-Yes",11,7.85714285714286
+"14","embryo phenotype","Yes-No",3,2.14285714285714
+"15","embryo phenotype","Yes-Yes",125,89.2857142857143
+"16","endocrine/exocrine gland phenotype","No-Yes",5,10.6382978723404
+"17","endocrine/exocrine gland phenotype","Yes-Yes",42,89.3617021276596
+"18","growth/size/body region phenotype","No-No",1,1.96078431372549
+"19","growth/size/body region phenotype","No-Yes",8,15.6862745098039
+"20","growth/size/body region phenotype","Yes-Yes",42,82.3529411764706
+"21","hearing/vestibular/ear phenotype","No-Yes",1,5.88235294117647
+"22","hearing/vestibular/ear phenotype","Yes-No",1,5.88235294117647
+"23","hearing/vestibular/ear phenotype","Yes-Yes",15,88.2352941176471
+"24","hematopoietic system phenotype","No-Yes",3,33.3333333333333
+"25","hematopoietic system phenotype","Yes-Yes",6,66.6666666666667
+"26","homeostasis/metabolism phenotype","No-Yes",1,5.88235294117647
+"27","homeostasis/metabolism phenotype","Yes-Yes",16,94.1176470588235
+"28","immune system phenotype","No-Yes",2,9.09090909090909
+"29","immune system phenotype","Yes-Yes",20,90.9090909090909
+"30","integument phenotype","No-Yes",10,13.6986301369863
+"31","integument phenotype","Yes-Yes",63,86.3013698630137
+"32","limbs/digits/tail phenotype","No-Yes",2,2.73972602739726
+"33","limbs/digits/tail phenotype","Yes-Yes",71,97.2602739726027
+"34","liver/biliary system phenotype","No-Yes",17,24.6376811594203
+"35","liver/biliary system phenotype","Yes-Yes",52,75.3623188405797
+"36","muscle phenotype","No-Yes",2,10
+"37","muscle phenotype","Yes-Yes",18,90
+"38","neoplasm","Yes-Yes",6,100
+"39","nervous system phenotype","No-No",1,1
+"40","nervous system phenotype","No-Yes",6,6
+"41","nervous system phenotype","Yes-No",1,1
+"42","nervous system phenotype","Yes-Yes",92,92
+"43","pigmentation phenotype","No-Yes",2,28.5714285714286
+"44","pigmentation phenotype","Yes-Yes",5,71.4285714285714
+"45","renal/urinary system phenotype","No-Yes",2,4
+"46","renal/urinary system phenotype","Yes-Yes",48,96
+"47","reproductive system phenotype","No-No",1,2.94117647058824
+"48","reproductive system phenotype","No-Yes",5,14.7058823529412
+"49","reproductive system phenotype","Yes-Yes",28,82.3529411764706
+"50","respiratory system phenotype","No-Yes",5,19.2307692307692
+"51","respiratory system phenotype","Yes-Yes",21,80.7692307692308
+"52","skeleton phenotype","No-Yes",4,6.25
+"53","skeleton phenotype","Yes-Yes",60,93.75
+"54","taste/olfaction phenotype","Yes-Yes",2,100
+"55","vision/eye phenotype","No-No",1,1.63934426229508
+"56","vision/eye phenotype","No-Yes",3,4.91803278688525
+"57","vision/eye phenotype","Yes-No",3,4.91803278688525
+"58","vision/eye phenotype","Yes-Yes",54,88.5245901639344
