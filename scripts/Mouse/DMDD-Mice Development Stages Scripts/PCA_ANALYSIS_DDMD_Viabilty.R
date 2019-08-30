@@ -13,7 +13,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);library(tidyverse);library(ggpubr);library(ggplot2)
+library(dplyr);library(tidyr);library(readr);library(tidyverse);library(ggpubr);library(ggplot2)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -203,6 +203,11 @@ options(scipen=999)
 
 (tk.primary<-TukeyHSD(res.anova_CLEANED_prim_viab))
 
+
+str(tk.primary)
+tk.primary$IMPC_Viability[,"p adj"]
+
+print(tk.primary,digits=20)
 
 format(tk.primary$IMPC_Viability[,"p adj"], scientific = TRUE)
 with(par(mai=c(1,2.5,1,1)),{plot(tk.primary, las=1,cex.axis=1)})
@@ -402,7 +407,7 @@ summary_<-summary(res.anova_second_viab_mouse_dmdd)
 # Window_Category     2   4662145   2331072   118.1 <2e-16 ***
 #   Residuals       10413 205515313   19736                   
 # ---
-#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#   Signif. codes:  0 â***â 0.001 â**â 0.01 â*â 0.05 â.â 0.1 â â 1
 
 
 ### Multiple pair-wise comparison 
@@ -848,6 +853,6 @@ tsne_sec.plot<-ggplot(tsne_sec.plot2,aes(x=x, y=y,
 # # 
 # library(cowplot)
 #  
-save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Viability/TSNE RESULTS/tsne_sec.plot2.png"),
-        tsne_sec.plot ,base_height= 10 ,base_aspect_ratio = 2) 
+#save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Viability/TSNE RESULTS/tsne_sec.plot2.png"),
+#        tsne_sec.plot ,base_height= 10 ,base_aspect_ratio = 2) 
 # # # 
