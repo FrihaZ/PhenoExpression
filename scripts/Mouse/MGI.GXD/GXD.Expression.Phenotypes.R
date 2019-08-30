@@ -12,7 +12,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);
+library(dplyr);library(tidyr);library(readr);
 
 ################################################################################################################################
 ################################################################################################################################
@@ -39,7 +39,17 @@ gxd.ts28 <- read_delim("D:/MSC RESEARCH PROJECT/GITHUB/data/MGIgeneExpressionQue
   mutate(Gene.Anatomy = paste0(MGI.ID,"-",Structure)) # create a new variable (Gene - Anatomy (Structure) term)
 
 
-## import MGI gene - phenotype data
+## count the number of KO genes 
+gxd.ts28_count<-gxd.ts28%>%
+  select(MGI.ID)%>%
+  drop_na()%>%
+  distinct()
+nrow(gxd.ts28_count)
+
+#################################################################################################################
+#############################################################################################################################
+
+##import MGI gene - phenotype data
 
 mgi.genepheno <-  read_delim("D:/MSC RESEARCH PROJECT/GITHUB/data/MGI_GenePheno.rpt",delim="\t",
                              col_names = c("Allelic.Composition","Allele.Symbols","Allele.ID",
@@ -76,12 +86,6 @@ mgi.genepheno.tissue.ts28 <- mgi.genepheno.tissue %>%
   distinct(MGI.ID,MP.ID,MP.Term,EMAPA.ID,EMAPA.Term,Gene.Anatomy,TS28.mutant.expression.detected) # unique rows
 
 
-### COUNT KO GENES
-Count_KO<-mgi.genepheno.tissue.ts28%>%
-  select(MGI.ID)%>%
-  distinct()
-
-View(Count_KO)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -118,6 +122,13 @@ gxd_wt.ts28<- read_delim("D:/MSC RESEARCH PROJECT/GITHUB/data/MGIgeneExpressionQ
   distinct(MGI.ID,Structure,TS28.wt.expression.detected) %>% # check again for duplicated rows
   mutate(Gene.Anatomy = paste0(MGI.ID,"-",Structure)) # create a new variable (Gene - Anatomy (Structure) term)
 
+
+
+gxd_wt.ts28_count<-gxd_wt.ts28%>%
+  select(MGI.ID)%>%
+  drop_na()%>%
+  distinct()
+nrow(gxd_wt.ts28_count)
 ################################################################################################################################
 ################################################################################################################################
 
@@ -132,15 +143,6 @@ mgi.genepheno.tissue.ts28_wt <- mgi.genepheno.tissue %>%
   # select columns of interest
   distinct(MGI.ID,MP.ID,MP.Term,EMAPA.ID,EMAPA.Term,Gene.Anatomy,TS28.wt.expression.detected) # unique rows
 
-################################################################################################################################
-################################################################################################################################
-
-### COUNT WT GENES
-Count_WT<-mgi.genepheno.tissue.ts28_wt%>%
-  select(MGI.ID)%>%
-  distinct()
-
-View(Count_WT)
 ################################################################################################################################
 ################################################################################################################################
 
@@ -203,20 +205,25 @@ mgi.genepheno.tissue.ts28_wt_mutant<-mgi.genepheno.tissue.ts28_wt_mutant%>%   # 
 View(mgi.genepheno.tissue.ts28_wt_mutant)
 
 
+#!!!!!!!!UNHASH TO SAVE FILE !!!!!!!!!!!!!!!!
+
+
+# write.csv(mgi.genepheno.tissue.ts28_wt_mutant,
+#           './Output_Files/Mice/mgi.genepheno.tissue.ts28_wt_mutant.csv')
+
 #####################################################################################################################################
 #####################################################################################################################################
 
 ### COUNT WT-KO GENES
 Count_WT_KO<-mgi.genepheno.tissue.ts28_wt_mutant%>%
   select(MGI.ID)%>%
+  drop_na()%>%
   distinct()
 
-View(Count_WT_KO)
-#!!!!!!!!UNHASH TO SAVE FILE !!!!!!!!!!!!!!!!
+nrow(Count_WT_KO)
 
-
-# write.csv(mgi.genepheno.tissue.ts28_wt_mutant,
-#           './Output_Files/Mice/mgi.genepheno.tissue.ts28_wt_mutant.csv')
+#######################################################################################################################
+###############################################################################################################################
 
 
 # Constingency table with gene names and count the number of No-No, No-Yes, Yes-Yes, Yes-No
@@ -225,7 +232,7 @@ Express_freq2<-ftable(mgi.genepheno.tissue.ts28_wt_mutant$MP.ID,
                       mgi.genepheno.tissue.ts28_wt_mutant$mp.description, 
                      mgi.genepheno.tissue.ts28_wt_mutant$Mutant.WT.Expression)
 
-#Express_freq2
+#View(Express_freq2)
 
 ######################################################################################################################
 #####################################################################################################################################
