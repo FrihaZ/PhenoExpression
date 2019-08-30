@@ -13,7 +13,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);library(tidyverse);library(ggpubr)
+library(dplyr);library(tidyr);library(readr);library(tidyverse);library(ggpubr)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -34,12 +34,12 @@ mgi.phenotypes<-read_delim("D:/MSC RESEARCH PROJECT/GITHUB/data/mgi.phenotypes.t
 
 clean_df<-function(df){
   
-  pheno_cleaned <- df %>% 
+  pheno_cleaned <- df %>%
     gather("GTEX.tissues","Expression", `Adipose - Subcutaneous`:`Whole Blood`)%>%
     select(HGNC.ID,hpo.ancestors,hpo.description,GTEX.tissues,Expression)%>%
     distinct()
   
-  # merge the tissues with their hpo.descp using the gtex file 
+  # merge the tissues with their hpo.descp using the gtex file
   
   
   # USE THE GTEX TISSUES TO GET THE HPO.DESCP-TISSUE RELATIONSHIP CORRECTED
@@ -53,7 +53,7 @@ clean_df<-function(df){
   
   # Merge the GTEX.Tissues.to.tissues and human_genes_TPM_greater0_pheno_count to get the duplicated tissues
   
-  pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned, 
+  pheno_cleaned_Tissues<-merge(GTEX.Tissues.to.tissues, pheno_cleaned,
                                by = c("GTEX.tissues", "GTEX.tissues"), all.x = TRUE)
   
   #View(pheno_cleaned_Tissues)
@@ -95,5 +95,3 @@ clean_df<-function(df){
 
 ##############################################################################################################################
 ############################################################################################################################
-
-## Use function to clean the dfs
