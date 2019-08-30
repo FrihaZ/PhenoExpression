@@ -12,7 +12,7 @@ This project aims to understand the connection between genotype and gene express
 
 To run the analysis scripts please download the files as shown in this GITHUB repository. Some files may have to be unzipped. 
 
-For the  'hgnc_symbol_checker.R' created by Dr Pilar Cacheiro please fork and download the repository from : https://github.com/FrihaZ/Gene-symbol-checker 
+For the  'hgnc_symbol_checker.R' created by Dr Pilar Cacheiro please fork and download the repository from : https://github.com/pilarcacheiro/Gene-symbol-checker
 
 
 ### Prerequisites
