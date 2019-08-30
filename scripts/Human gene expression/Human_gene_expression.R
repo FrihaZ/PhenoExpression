@@ -13,7 +13,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);library(tidyverse);library(ggpubr)
+library(dplyr);library(tidyr);library(readr);library(tidyverse)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -140,41 +140,6 @@ options("scipen"=100)
 # TPM > 0 (yes,no)
 # TPM > 0.1 (yes, no)
 # TPM> 1 (yes, no)
-
-## GENES WITH NO GENE EXPRESSION (TPM =0) ###########################################################
-human_genes_TPM_None<- human_genes
-
-human_genes_TPM_None[4:56 ][ human_genes_TPM_None[4:56 ] > 0 ] <- "No"
-
-human_genes_TPM_None[4:56 ][ human_genes_TPM_None[4:56 ] <= 0 ] <- "Yes"
-
-View(human_genes_TPM_None)
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
-
-# write.csv(human_genes_TPM_None,'./Output_Files/Human/No_Expression/human_genes_TPM_None.csv')
-
-#####################################################################################################
-
-# GENES WITHTPM > 0 (yes,no)##################################################################
-
-human_genes_TPM_greater0<- human_genes
-
-
-human_genes_TPM_greater0[4:56 ][ human_genes_TPM_greater0[4:56 ] > 0 ] <- "Yes"
-
-human_genes_TPM_greater0[4:56 ][ human_genes_TPM_greater0[4:56 ] <= 0 ] <- "No"
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
-# write.csv(human_genes_TPM_greater0,'./Output_Files/Human/Expression_greater_0/human_genes_TPM_greater0.csv')
-
-
-##View(human_genes_TPM_greater0)
-
-###############################################################################################################
-
 
 # GENES WITH TPM > 0.1 (yes, no) ########################################################################
 
@@ -370,122 +335,24 @@ all_genes_pheno_No_disease_count<-all_genes_pheno_No_disease%>%
 #nrow(all_genes_pheno_No_disease_count)
 
 ######################################################################################################################
-##########################################################################################################
-
-
-
-#######################################################################################
-## NO EXPRESSION
-
-# DISEASE RELATED GENES
-
-## E-P+
-
-human_genes_TPM_None_phenotype<- left_join(human_genes_TPM_None, HPO_phenotypes, by=c("HGNC.ID"= "HGNC.ID"))
-
-
-
-human_genes_TPM_None_pheno <-human_genes_TPM_None_phenotype%>%
-  select_all()%>%
-  drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
-  select(-`#Format: entrez-gene-id`,-`entrez-gene-symbol` ,-`Type.y`, -`HPO-Term-Name`)%>%   #removed the entrez-gene-id etc
-  distinct()
-
-
-#View(human_genes_TPM_None_pheno)
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
-
-# write.csv(human_genes_TPM_None_pheno,
-#           './Output_Files/Human/No_Expression/human_genes_TPM_None_pheno.csv')
-
-
-######################################################################################################
-
-## EXPRESSION:- PHENOTYPE:-
-# Remove all genes that are disease related, and keep all those that are not disease related. 
-
-human_genes_TPM_None_pheno_No_disease<-human_genes_TPM_None_phenotype[!(human_genes_TPM_None_phenotype$HGNC.ID %in% human_genes_TPM_None_pheno$HGNC.ID),]
-
-human_genes_TPM_None_pheno_No_disease<-human_genes_TPM_None_pheno_No_disease%>%
-  select_all()%>%
-  select(-`#Format: entrez-gene-id`,-`entrez-gene-symbol` ,-`Type.y`, -`HPO-Term-Name`,
-         -`HPO-Term-ID`,-`hpo.ancestors`, -`hpo.description` )%>%   #removed the entrez-gene-id etc
-  distinct()
-
-#View(human_genes_TPM_None_pheno_No_disease)
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
- 
-# write.csv(human_genes_TPM_None_pheno_No_disease,
-#           './Output_Files/Human/No_Expression/human_genes_TPM_None_pheno_No_disease.csv')
-
-
-
-#human_genes_TPM_None
-
-
-#######################################################################################
-
-# DISEASE RELATED GENES
-#EXPRESSION:+ PHENOTYPE:+
-
-
-human_genes_TPM_greater0_phenotype<- left_join(human_genes_TPM_greater0, HPO_phenotypes, by=c("HGNC.ID"= "HGNC.ID"))
-
-
-
-human_genes_TPM_greater0_pheno <-human_genes_TPM_greater0_phenotype%>%
-  select_all()%>%
-  drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
-  select(-`#Format: entrez-gene-id`,-`entrez-gene-symbol` ,-`Type.y`, -`HPO-Term-Name`)%>%   #removed the entrez-gene-id etc
-  distinct()
-
-
-#View(human_genes_TPM_greater0_pheno)
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
- 
-# write.csv(human_genes_TPM_greater0_pheno,
-#           './Output_Files/Human/Expression_greater_0/human_genes_TPM_greater0_pheno.csv')
-
-
-
-# Remove all genes that are disease related, and keep all those that are not disease related. 
-
-human_genes_greater0_pheno_No_disease<-human_genes_TPM_greater0_phenotype[!(human_genes_TPM_greater0_phenotype$HGNC.ID %in% human_genes_TPM_greater0_pheno$HGNC.ID),]
-
-human_genes_greater0_pheno_No_disease<-human_genes_greater0_pheno_No_disease%>%
-  select_all()%>%
-  select(-`#Format: entrez-gene-id`,-`entrez-gene-symbol` ,-`Type.y`, -`HPO-Term-Name`,
-         -`HPO-Term-ID`,-`hpo.ancestors`, -`hpo.description` )%>%   #removed the entrez-gene-id etc
-  distinct()
-
-#View(human_genes_greater0_pheno_No_disease)
-
-#!!!!! UNHASH TO SAVE FILE!!!!!!!
-
-
-# write.csv(human_genes_greater0_pheno_No_disease,
-#           './Output_Files/Human/Expression_greater_0/human_genes_greater0_pheno_No_disease.csv')
-
-
+######~~~~~~~~~~Map genes with gene expression to the HPO annotations (top level)~~~~~~~~~~~~~~################################
 
 ########################################################################################################
-# Map genes with gene expression to the HPO annotations (top level)
+
+### 0.1
+
 
 human_genes_TPM_0.1_phenotype<- left_join(human_genes_TPM_0.1, HPO_phenotypes, by=c("HGNC.ID"= "HGNC.ID"))
 
+############################################################################################
+# DISEASE RELATED GENES 0.1
 
-# DISEASE RELATED GENES
 human_genes_TPM_0.1_pheno <-human_genes_TPM_0.1_phenotype%>%
   select_all()%>%
   drop_na() %>%  #removed NAs that for the genes that didn't have a hgncd.id 
   select(-`#Format: entrez-gene-id`,-`entrez-gene-symbol` ,-`Type.y`, -`HPO-Term-Name`)%>%   #removed the entrez-gene-id etc
   distinct()
+
 
 
 #View(human_genes_TPM_0.1_pheno)
@@ -494,8 +361,18 @@ human_genes_TPM_0.1_pheno <-human_genes_TPM_0.1_phenotype%>%
 
 # write.csv(human_genes_TPM_0.1_pheno,
 #           './Output_Files/Human/Expression_0.1/human_genes_TPM_0.1_pheno.csv')
-# 
 
+
+## COUNT NUMBER OF DISEASE GENES
+
+COUNT_0.1_DISEASE<-human_genes_TPM_0.1_pheno%>%
+  select(HGNC.ID)%>%
+  distinct()
+
+nrow(COUNT_0.1_DISEASE) 
+
+#################################################################################################
+#0.1
 # Remove all genes that are disease related, and keep all those that are not disease related. 
 
 human_genes_TPM_0.1_pheno_No_disease<-human_genes_TPM_0.1_phenotype[!(human_genes_TPM_0.1_phenotype$HGNC.ID %in% human_genes_TPM_0.1_pheno$HGNC.ID),]
@@ -506,7 +383,7 @@ human_genes_TPM_0.1_pheno_No_disease<-human_genes_TPM_0.1_pheno_No_disease%>%
          -`HPO-Term-ID`,-`hpo.ancestors`, -`hpo.description` )%>%   #removed the entrez-gene-id etc
   distinct()
 
-#View(human_genes_TPM_0.1_pheno_No_disease)
+View(human_genes_TPM_0.1_pheno_No_disease)
 
 #!!!!! UNHASH TO SAVE FILE!!!!!!!
 
@@ -515,13 +392,26 @@ human_genes_TPM_0.1_pheno_No_disease<-human_genes_TPM_0.1_pheno_No_disease%>%
 
 
 
+
+## COUNT NUMBER OF NON-DISEASE GENES
+
+COUNT_0.1_NO_DISEASE<-human_genes_TPM_0.1_pheno_No_disease%>%
+  select(HGNC.ID)%>%
+  distinct()
+
+nrow(COUNT_0.1_NO_DISEASE) 
+
+
 #########################################################################################################
 
+# >1
 # DISEASE RELATED GENES
 
 human_genes_TPM_1_phenotype<- left_join(human_genes_TPM_1, HPO_phenotypes, by=c("HGNC.ID"= "HGNC.ID"))
 
 #View(human_genes_TPM_1_phenotype)
+
+
 
 human_genes_TPM_1_pheno <-human_genes_TPM_1_phenotype%>%
   select_all()%>%
@@ -537,6 +427,18 @@ human_genes_TPM_1_pheno <-human_genes_TPM_1_phenotype%>%
 # write.csv(human_genes_TPM_1_pheno,
 #           './Output_Files/Human/Expression_1/human_genes_TPM_1_pheno.csv')
 
+
+
+## COUNT NUMBER OF DISEASE GENES
+
+COUNT_1_DISEASE<-human_genes_TPM_1_pheno%>%
+  select(HGNC.ID)%>%
+  distinct()
+
+nrow(COUNT_1_DISEASE) 
+
+##############################################################################################
+# >1
 
 # Remove all genes that are disease related, and keep all those that are not disease related. 
 
@@ -556,11 +458,18 @@ human_genes_TPM_1_pheno_No_disease<-human_genes_TPM_1_pheno_No_disease%>%
 #           './Output_Files/Human/Expression_1/human_genes_TPM_1_pheno_No_disease.csv')
 
 
+## COUNT NUMBER OF NON-DISEASE GENES
+
+COUNT_1_NO_DISEASE<-human_genes_TPM_1_pheno_No_disease%>%
+  select(HGNC.ID)%>%
+  distinct()
+
+nrow(COUNT_1_NO_DISEASE) 
 
 #########################################################################################################
 #########################################################################################################
 
-## ALL NON-DISEASE GENES!
+##~~~~~~~~~~~~~~~~~~~~ALL NON-DISEASE GENES!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Remove the phenotype description ,hpo.ancestors HPO.Term and count the number of Yes for each row (gene) for 
 # each threshold
@@ -569,196 +478,6 @@ human_genes_TPM_1_pheno_No_disease<-human_genes_TPM_1_pheno_No_disease%>%
 #########################################################################################################
 #########################################################################################################
 
-
-
-
-
-# For expressions =0, calculate the number of Yes and No
-
-human_genes_TPM_None_pheno_No_disease$NUMBER_OF_YES <- rowSums(human_genes_TPM_None_pheno_No_disease == "Yes")
-human_genes_TPM_None_pheno_No_disease$NUMBER_OF_NO <- rowSums(human_genes_TPM_None_pheno_No_disease == "No")
-
-human_genes_TPM_None_pheno_No_disease<-human_genes_TPM_None_pheno_No_disease %>%
-  select_all()%>%
-  distinct()
-
-#View(human_genes_TPM_None_pheno_No_disease)
-
-
-
-
-#########################################################################################################
-#########################################################################################################
-
-## COUNT THE NUMBER OF NON-DISEASE GENES EXPRESSED FOR EACH TISSUE
-
-
-
-human_genes_TPM_None_tissue_ND<-human_genes_TPM_None_pheno_No_disease%>%
-  select_all()%>%
-  select(-NUMBER_OF_NO, -NUMBER_OF_YES, -`HGNC.ID`, -`Description`, -`Type.x`)
-
-human_genes_TPM_None_tissue_ND <- colSums(human_genes_TPM_None_tissue_ND == "Yes")
-
-human_genes_TPM_None_tissue_ND<-data.frame(human_genes_TPM_None_tissue_ND)
-
-human_genes_TPM_None_tissue_ND<-setNames(cbind(rownames(human_genes_TPM_None_tissue_ND), human_genes_TPM_None_tissue_ND,
-                                               row.names = NULL), 
-                                             c("Tissue", "Number_of_Yes"))
-#View(human_genes_TPM_None_tissue_ND)
-
-
-
-
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is =0
-#and not disease associated
-
-library(ggplot2)
-
-
-#dev.new(width=60, height=30) # to open in a new window
-
-p_None_tissue_ND<-ggplot(data=human_genes_TPM_None_tissue_ND,
-                             aes(x=reorder(human_genes_TPM_None_tissue_ND$Tissue,
-                                           -human_genes_TPM_None_tissue_ND$Number_of_Yes),
-                                 y=human_genes_TPM_None_tissue_ND$Number_of_Yes,
-                                 fill=human_genes_TPM_None_tissue_ND$Number_of_Yes))
-
-p_None_tissue_ND <-p_None_tissue_ND %>%
-  
-  + labs(x= "Tissue", y="Number of Genes",         
-         subtitle= "Genes Not Associated with Disease")%>%
-  
-  + scale_fill_gradient(low = "blue", 
-                        high = "red")%>%
-  + scale_y_continuous(breaks = seq(0, 14000, by = 1000))%>%
-  
-  + guides(fill=guide_legend(title="Number of Genes Expressed:  ")) %>%
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=10),
-          legend.position = "bottom",legend.direction = "horizontal",
-          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-          axis.text.y= element_text(size=8),
-          axis.text.x= element_text(size=10),
-          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
-  +geom_text(aes(label=paste0(round(human_genes_TPM_None_tissue_ND$Number_of_Yes,1))),size = 3, position = position_stack(vjust = 0.5), colour=c("white"), fontface='bold') %>%
-  
-  + coord_flip()
-
-p_None_tissue_ND
-
-
-###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_None_tissue_ND.jpeg",
-          p_None_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
-
-
-
-
-
-
-
-
-#########################################################################################################
-
-
-# For expressions >0, calculate the number of Yes and No
-
-human_genes_greater0_pheno_No_disease$NUMBER_OF_YES <- rowSums(human_genes_greater0_pheno_No_disease == "Yes")
-human_genes_greater0_pheno_No_disease$NUMBER_OF_NO <- rowSums(human_genes_greater0_pheno_No_disease == "No")
-
-human_genes_greater0_pheno_No_disease<-human_genes_greater0_pheno_No_disease %>%
-  select_all()%>%
-  distinct()
-
-#View(human_genes_greater0_pheno_No_disease)
-
-
-
-
-#########################################################################################################
-#########################################################################################################
-
-## COUNT THE NUMBER OF NON-DISEASE GENES EXPRESSED FOR EACH TISSUE
-
-human_genes_TPM_greater0_tissue_ND<-human_genes_greater0_pheno_No_disease%>%
-  select_all()%>%
-  select(-NUMBER_OF_NO, -NUMBER_OF_YES, -`HGNC.ID`, -`Description`, -`Type.x`)
-
-human_genes_TPM_greater0_tissue_ND <- colSums(human_genes_TPM_greater0_tissue_ND == "Yes")
-
-human_genes_TPM_greater0_tissue_ND<-data.frame(human_genes_TPM_greater0_tissue_ND)
-
-human_genes_TPM_greater0_tissue_ND<-setNames(cbind(rownames(human_genes_TPM_greater0_tissue_ND), human_genes_TPM_greater0_tissue_ND, row.names = NULL), 
-         c("Tissue", "Number_of_Yes"))
-#View(human_genes_TPM_greater0_tissue_ND)
-
-
-
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >0 and not disease specific
-
-library(ggplot2)
-
-
-#dev.new(width=60, height=30) # to open in a new window
-
-p_greater0_tissue_ND<-ggplot(data=human_genes_TPM_greater0_tissue_ND,
-                aes(x=reorder(human_genes_TPM_greater0_tissue_ND$Tissue,
-                              -human_genes_TPM_greater0_tissue_ND$Number_of_Yes),
-                y=human_genes_TPM_greater0_tissue_ND$Number_of_Yes,
-                fill=human_genes_TPM_greater0_tissue_ND$Number_of_Yes))
-
-p_greater0_tissue_ND <-p_greater0_tissue_ND %>%
-  
-  + labs(x= "Tissue", y="Number of Genes",         
-         subtitle= "Genes Not Associated with Disease")%>%
-
-  + scale_fill_gradient(low = "blue", 
-                        high = "red")%>%
-  + scale_y_continuous(breaks = seq(0, 14000, by = 1000))%>%
-  
-  + guides(fill=guide_legend(title="Number of Genes Expressed:  ")) %>%
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=10),
-          legend.position = "bottom",legend.direction = "horizontal",
-          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-          axis.text.y= element_text(size=8),
-          axis.text.x= element_text(size=10),
-          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
-  +geom_text(aes(label=paste0(round(human_genes_TPM_greater0_tissue_ND$Number_of_Yes,1))),size = 3, position = position_stack(vjust = 0.5), colour=c("white"), fontface='bold') %>%
-  
-  + coord_flip()
-
-
-
-###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_greater0_tissue_ND.png",
-          p_greater0_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
-
-
-
-
-
-
-
-
-
-
-
-
-#########################################################################################################
 
 # For expression greater than 0.1
 
@@ -772,7 +491,6 @@ human_genes_TPM_0.1_pheno_No_disease<-human_genes_TPM_0.1_pheno_No_disease %>%
   distinct()
 
 #View(human_genes_TPM_0.1_pheno_No_disease)
-
 
 
 ## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH TISSUE
@@ -794,11 +512,10 @@ human_genes_TPM_0.1_tissue_ND<-setNames(cbind(rownames(human_genes_TPM_0.1_tissu
                                           c("Tissue", "Number_of_Yes"))
 #View(human_genes_TPM_0.1_tissue_ND)
 
+###############################################################################################################
 
 
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific
+#~~~~~~~~~~~PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific ~~~~~~~~#################################################
 
 library(ggplot2)
 
@@ -835,10 +552,10 @@ p_TPM_0.1_tissue_ND<-p_TPM_0.1_tissue_ND %>%
 
 
 ###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_0.1_tissue_ND.png",
-          p_TPM_0.1_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Tissue/p_TPM_0.1_tissue_ND.png",
+#           p_TPM_0.1_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
 
 
 
@@ -857,6 +574,8 @@ human_genes_TPM_1_pheno_No_disease<-human_genes_TPM_1_pheno_No_disease %>%
   distinct()
 
 #View(human_genes_TPM_1_pheno_No_disease)
+
+
 ## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH TISSUE
 
 human_genes_TPM_1_tissue_ND<-human_genes_TPM_1_pheno_No_disease%>%
@@ -879,9 +598,8 @@ human_genes_TPM_1_tissue_ND<-setNames(cbind(rownames(human_genes_TPM_1_tissue_ND
 
 
 
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
 
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific
+#~~~~~~~~~PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific~~~~~~~~~~~~~~~~~~##########################
 
 library(ggplot2)
 
@@ -917,10 +635,10 @@ p_TPM_1_tissue_ND<-p_TPM_1_tissue_ND %>%
 
 
 ###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_1_tissue_ND.png",
-          p_TPM_1_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Tissue/p_TPM_1_tissue_ND.png",
+#           p_TPM_1_tissue_ND ,base_height= 10 ,base_aspect_ratio = 2) 
 
 
 
@@ -928,200 +646,13 @@ save_plot("./Plots/Human/Tissue/p_TPM_1_tissue_ND.png",
 #########################################################################################################
 #########################################################################################################
 
-## ALL DISEASE GENES!
+##~~~~~~~~~~~~~~~~~~~~~~~~~ALL DISEASE GENES!~~~~~~~~~~~~~~~~~~~~~~~~~~~###################################
 
 # Remove the phenotype description ,hpo.ancestors HPO.Term and count the number of Yes for each row (gene) for 
 # each threshold
 
 
 #########################################################################################################
-
-
-
-#Threshold =0 for all disease associated genes
-
-human_genes_TPM_None_pheno_disease<-human_genes_TPM_None_pheno%>%
-  select_all()%>%
-  select(-`HPO-Term-ID` , -`hpo.ancestors`,-`hpo.description`)%>%
-  distinct()
-
-
-
-#View(human_genes_TPM_None_pheno_disease)
-
-# The number of Tissues that each gene is expressed in
-
-human_genes_TPM_None_pheno_disease$NUMBER_OF_YES <- rowSums(human_genes_TPM_None_pheno_disease == "Yes")
-human_genes_TPM_None_pheno_disease$NUMBER_OF_NO <- rowSums(human_genes_TPM_None_pheno_disease == "No")
-
-human_genes_TPM_None_pheno_disease<-human_genes_TPM_None_pheno_disease %>%
-  select_all()%>%
-  distinct()
-
-#View(human_genes_TPM_None_pheno_disease)
-
-
-
-## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH TISSUE
-
-human_genes_TPM_None_pheno_disease_tissue_D<-human_genes_TPM_None_pheno_disease%>%
-  select_all()%>%
-  select(-NUMBER_OF_NO, -NUMBER_OF_YES, -`HGNC.ID`, -`Description`, -`Type.x`)
-
-human_genes_TPM_None_pheno_disease_tissue_D <- colSums(human_genes_TPM_None_pheno_disease_tissue_D == "Yes")
-
-
-#View(human_genes_TPM_None_pheno_disease_tissue_D)
-
-
-human_genes_TPM_None_pheno_disease_tissue_D<-data.frame(human_genes_TPM_None_pheno_disease_tissue_D)
-
-human_genes_TPM_None_pheno_disease_tissue_D<-setNames(cbind(rownames(human_genes_TPM_None_pheno_disease_tissue_D), 
-                                                            human_genes_TPM_None_pheno_disease_tissue_D, row.names = NULL), 
-                                                          c("Tissue", "Number_of_Yes"))
-#View(human_genes_TPM_None_pheno_disease_tissue_D)
-
-
-
-
-
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >0 and not disease specific
-
-library(ggplot2)
-
-
-#dev.new(width=60, height=30) # to open in a new window
-
-p_TPM_None_tissue_D<-ggplot(data=human_genes_TPM_None_pheno_disease_tissue_D,
-                                aes(x=reorder(human_genes_TPM_None_pheno_disease_tissue_D$Tissue, 
-                                              -human_genes_TPM_None_pheno_disease_tissue_D$Number_of_Yes),
-                                    y=human_genes_TPM_None_pheno_disease_tissue_D$Number_of_Yes, 
-                                    fill=human_genes_TPM_None_pheno_disease_tissue_D$Number_of_Yes))
-p_TPM_None_tissue_D<-p_TPM_None_tissue_D %>%
-  + labs(x= "Tissue", y="Number of Genes", 
-         subtitle= "Genes Associated with Disease")%>%
-  + scale_fill_gradient(low = "blue", 
-                        high = "red")%>% 
-  + scale_y_continuous(breaks = seq(0, 14000, by = 1000))%>%
-  
-  + guides(fill=guide_legend(title="Number of Genes Expressed:  ")) %>%
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=10),
-          legend.position = "bottom",legend.direction = "horizontal",
-          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-          axis.text.y= element_text(size=8),
-          axis.text.x= element_text(size=10),
-          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
-  +geom_text(aes(label=paste0(round(human_genes_TPM_None_pheno_disease_tissue_D$Number_of_Yes,1))),size = 3, position = position_stack(vjust = 0.5), colour=c("white"), fontface='bold') %>%
-  
-  + coord_flip()
-
-
-###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_None_tissue_D.png",
-          p_TPM_None_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
-
-
-
-###################################################################################################################
-
-
-#Threshold >0 for all disease associated genes
-
-human_genes_TPM_greater0_pheno_disease<-human_genes_TPM_greater0_pheno%>%
-  select_all()%>%
-  select(-`HPO-Term-ID` , -`hpo.ancestors`,-`hpo.description`)%>%
-  distinct()
-
-
-
-##View(human_genes_TPM_greater0_pheno_disease)
-
-# The number of Tissues that each gene is expressed in
-
-human_genes_TPM_greater0_pheno_disease$NUMBER_OF_YES <- rowSums(human_genes_TPM_greater0_pheno_disease == "Yes")
-human_genes_TPM_greater0_pheno_disease$NUMBER_OF_NO <- rowSums(human_genes_TPM_greater0_pheno_disease == "No")
-
-human_genes_TPM_greater0_pheno_disease<-human_genes_TPM_greater0_pheno_disease %>%
-  select_all()%>%
-  distinct()
-
-##View(human_genes_TPM_greater0_pheno_disease)
-
-
-
-## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH TISSUE
-
-human_genes_TPM_greater0_pheno_disease_tissue_D<-human_genes_TPM_greater0_pheno_disease%>%
-  select_all()%>%
-  select(-NUMBER_OF_NO, -NUMBER_OF_YES, -`HGNC.ID`, -`Description`, -`Type.x`)
-
-human_genes_TPM_greater0_pheno_disease_tissue_D <- colSums(human_genes_TPM_greater0_pheno_disease_tissue_D == "Yes")
-
-
-##View(human_genes_TPM_greater0_pheno_disease_tissue_D)
-
-
-human_genes_TPM_greater0_pheno_disease_tissue_D<-data.frame(human_genes_TPM_greater0_pheno_disease_tissue_D)
-
-human_genes_TPM_greater0_pheno_disease_tissue_D<-setNames(cbind(rownames(human_genes_TPM_greater0_pheno_disease_tissue_D), 
-                                                                human_genes_TPM_greater0_pheno_disease_tissue_D, row.names = NULL), 
-                                                     c("Tissue", "Number_of_Yes"))
-##View(human_genes_TPM_greater0_pheno_disease_tissue_D)
-
-
-
-
-
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >0 and not disease specific
-
-library(ggplot2)
-
-
-#dev.new(width=60, height=30) # to open in a new window
-
-p_TPM_greater0_tissue_D<-ggplot(data=human_genes_TPM_greater0_pheno_disease_tissue_D,
-                            aes(x=reorder(human_genes_TPM_greater0_pheno_disease_tissue_D$Tissue, 
-                                                             -human_genes_TPM_greater0_pheno_disease_tissue_D$Number_of_Yes),
-                                 y=human_genes_TPM_greater0_pheno_disease_tissue_D$Number_of_Yes, 
-                                 fill=human_genes_TPM_greater0_pheno_disease_tissue_D$Number_of_Yes))
-p_TPM_greater0_tissue_D<-p_TPM_greater0_tissue_D %>%
-  + labs(x= "Tissue", y="Number of Genes", 
-         subtitle= "Genes Associated with Disease")%>%
-  + scale_fill_gradient(low = "blue", 
-                        high = "red")%>% 
-  + scale_y_continuous(breaks = seq(0, 14000, by = 1000))%>%
-  
-  + guides(fill=guide_legend(title="Number of Genes Expressed:  ")) %>%
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=10),
-          legend.position = "bottom",legend.direction = "horizontal",
-          legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-          axis.text.y= element_text(size=8),
-          axis.text.x= element_text(size=10),
-          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
-  +geom_text(aes(label=paste0(round(human_genes_TPM_greater0_pheno_disease_tissue_D$Number_of_Yes,1))),size = 3, position = position_stack(vjust = 0.5), colour=c("white"), fontface='bold') %>%
-  
-  + coord_flip()
-
-
-###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_greater0_tissue_D.png",
-          p_TPM_greater0_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
-
-###################################################################################################################
 
 
 #Threshold >0.1 for all disease associated genes
@@ -1171,18 +702,13 @@ human_genes_TPM_0.1_pheno_disease_tissue_D<-setNames(cbind(rownames(human_genes_
 ##View(human_genes_TPM_0.1_pheno_disease_tissue_D)
 
 
+##########################################################################################################################
+
+#~~~~~~~~PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and disease specific ~~~~~~~~~#################################
 
 
 
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
-
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific
-
-# NEW GRAPH
 library(ggplot2)
-
-
-#dev.new(width=60, height=30) # to open in a new window
 
 p_TPM_0.1_tissue_D<-ggplot(data=human_genes_TPM_0.1_pheno_disease_tissue_D
                             , aes(x=reorder(human_genes_TPM_0.1_pheno_disease_tissue_D$Tissue, 
@@ -1217,10 +743,10 @@ p_TPM_0.1_tissue_D<-p_TPM_0.1_tissue_D %>%
 
 
 ###!!! UNHASH TO SAVE PLOT!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_0.1_tissue_D.png",
-          p_TPM_0.1_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Tissue/p_TPM_0.1_tissue_D.png",
+#           p_TPM_0.1_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
 
 
 #######################################################################################################################################################
@@ -1278,16 +804,12 @@ human_genes_TPM_1_pheno_disease_tissue_D$Tissue <- reorder(human_genes_TPM_1_phe
 ##View(human_genes_TPM_1_pheno_disease_tissue_D)
 
 
-#####~~~~~~!!!!!!!!!!!!!!IMPORTANT KEEP FOR DISSERTATION!!!!!!!!!!!~~~~~~##############
+#######################################################################################################################################
 
-# PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and not disease specific
+
+#~~~~~~~~~~~PLOT THE NUMBER OF GENES THAT ARE EXPRESSED IN EACH TISSUE, where gene expression is >/=0.1 and disease specific ~~~~~~~################################
 
 library(ggplot2)
-
-#dev.new(width=60, height=30) # to open in a new window
-
-
-
 
 
 p_TPM_1_tissue_D<-ggplot(data=human_genes_TPM_1_pheno_disease_tissue_D
@@ -1321,62 +843,21 @@ p_TPM_1_tissue_D<-p_TPM_1_tissue_D %>%
 
 
 ###!!! UNHASH TO SAVE PLOT!!!!!
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Tissue/p_TPM_1_tissue_D.png",
+#           p_TPM_1_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
 
-library(cowplot)
-save_plot("./Plots/Human/Tissue/p_TPM_1_tissue_D.png",
-          p_TPM_1_tissue_D ,base_height= 10 ,base_aspect_ratio = 2) 
+
 
 #####################################################################################################################################################
 ########################################################################################################################################################
 
-# SHOW GRAPHS IN A REPRESENTABLE WAY
+#~~~~~~~~~~SHOW GRAPHS IN A REPRESENTABLE WAY ~~~~~~~~~~~~~#####################
 
 library(gridExtra)
 library(grid)
 
-# NO EXPRESSION :=0
-
-dev.new(width=60, height=30) # to open in a new window
-
-
-grid.arrange(
-  p_TPM_None_tissue_D,
-  p_None_tissue_ND,
-  nrow = 1,
-  top = textGrob(
-    "Gene Expression =0 (TPM)",
-    gp = gpar(fontface = 2, fontsize = 18),
-    hjust = 0.5
-  ),
-  bottom = textGrob(
-    "",
-    gp = gpar(fontface = 3, fontsize = 9),
-    hjust = 0.5  )
-)
-
-########################################################################################################################################################
-# >0
-
-
-dev.new(width=60, height=30) # to open in a new window
-
-
-grid.arrange(
-  p_TPM_greater0_tissue_D,
-  p_greater0_tissue_ND,
-  nrow = 1,
-  top = textGrob(
-    "Gene Expression >0 (TPM)",
-    gp = gpar(fontface = 2, fontsize = 18),
-    hjust = 0.5
-  ),
-  bottom = textGrob(
-    "",
-    gp = gpar(fontface = 3, fontsize = 9),
-    hjust = 0.5  )
-)
-
-########################################################################################################################################################
 # 0.1
 
 
@@ -1429,7 +910,7 @@ grid.arrange(
 ########################################################################################################################################################
 
 
-# Merge the HGNC.ID dataframes for each threshold to get a disease and non-disease box-plot
+#~~~~~~~~Merge the HGNC.ID dataframes for each threshold to get a disease and non-disease box-plot~~~~~~~~~~~~############################
 
 ##View(human_genes_TPM_None_pheno_disease)
 
@@ -1443,11 +924,9 @@ names(HGNC.ID_DISEASE_None)[names(HGNC.ID_DISEASE_None) == 'NUMBER_OF_YES'] <- '
 names(HGNC.ID_NO_DISEASE_None)[names(HGNC.ID_NO_DISEASE_None) == 'NUMBER_OF_YES'] <- 'VALUE'
 
 
-
-
-
 ##View(HGNC.ID_DISEASE)
 ##View(HGNC.ID_NO_DISEASE)
+
 
 HGNC.ID_DISEASE_None["GROUP"] <- "Disease Associated" # That creates the new column named "MY_NEW_COLUMN" 
 HGNC.ID_NO_DISEASE_None["GROUP"] <- "Not Disease Associated" # That creates the new column named "MY_NEW_COLUMN" filled with "NA"
@@ -1455,125 +934,10 @@ HGNC.ID_NO_DISEASE_None["GROUP"] <- "Not Disease Associated" # That creates the 
 
 HGNC.ID_DISEASE_NON_DI_None<- rbind(HGNC.ID_DISEASE_None, 
                                     HGNC.ID_NO_DISEASE_None)
-# # Make Violin plot
 
-#View(HGNC.ID_DISEASE_NON_DI_None)
-#table(HGNC.ID_DISEASE_NON_DI_greater0$GROUP)
+#########################################################################################
 
-dev.new(width=60, height=30) # to open in a new window
-
-p_None_violin<-ggplot(HGNC.ID_DISEASE_NON_DI_None, 
-                          aes(x=HGNC.ID_DISEASE_NON_DI_None$GROUP, 
-                              y=HGNC.ID_DISEASE_NON_DI_None$VALUE, fill=GROUP))+ geom_violin(trim=FALSE)
-p_None_violin<-p_None_violin%>%
-  + scale_y_continuous(breaks = seq(-25, 60, by = 20))%>%
-  
-  + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "Gene Expression = 0 TPM ") %>%
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=12),
-          axis.text.y= element_text(size=12),
-          axis.text.x= element_text(size=12))%>%
-  +stat_summary(fun.data="mean_sdl", 
-                geom="pointrange", width=0.2, colour="black" )%>%
-  +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE)    # Add global p-valu   # Add global p-valu
-
-
-p_None_violin
-
-
-library(cowplot)
-save_plot("./Plots/Human/Disease_Non-Disease/p_None_violin.jpeg",
-          p_None_violin ,base_height= 10 ,base_aspect_ratio = 2) 
- 
-
-
-##CALCULATE THE MEAN AND SD
-
-HGNC.ID_None_MEAN_SD <- aggregate(VALUE~ GROUP, HGNC.ID_DISEASE_NON_DI_None, function(x) c(mean = mean(x), sd = sd(x)))
-
-HGNC.ID_None_MEAN_SD
-
-
-
-
-################################################################################################################################
-## >0
-
-# Merge the HGNC.ID dataframes for each threshold to get a disease and non-disease box-plot
-
-##View(human_genes_TPM_greater0_pheno_disease)
-
-HGNC.ID_DISEASE<- human_genes_TPM_greater0_pheno_disease%>%
-  select(NUMBER_OF_YES)
-
-HGNC.ID_NO_DISEASE<- human_genes_greater0_pheno_No_disease%>%
-  select(NUMBER_OF_YES)
-
-names(HGNC.ID_DISEASE)[names(HGNC.ID_DISEASE) == 'NUMBER_OF_YES'] <- 'VALUE'
-names(HGNC.ID_NO_DISEASE)[names(HGNC.ID_NO_DISEASE) == 'NUMBER_OF_YES'] <- 'VALUE'
-
-
-                                  
-
-
-##View(HGNC.ID_DISEASE)
-##View(HGNC.ID_NO_DISEASE)
-
-HGNC.ID_DISEASE["GROUP"] <- "Disease Associated" # That creates the new column named "MY_NEW_COLUMN" 
-HGNC.ID_NO_DISEASE["GROUP"] <- "Not Disease Associated" # That creates the new column named "MY_NEW_COLUMN" filled with "NA"
-
-
-HGNC.ID_DISEASE_NON_DI_greater0<- rbind(HGNC.ID_DISEASE, 
-                                    HGNC.ID_NO_DISEASE)
-# # Make Violin plot
-
-##View(HGNC.ID_DISEASE_NON_DI_greater0)
-#table(HGNC.ID_DISEASE_NON_DI_greater0$GROUP)
-
-dev.new(width=60, height=30) # to open in a new window
-
-p_greater0_violin<-ggplot(HGNC.ID_DISEASE_NON_DI_greater0, 
-                          aes(x=HGNC.ID_DISEASE_NON_DI_greater0$GROUP, 
-                              y=HGNC.ID_DISEASE_NON_DI_greater0$VALUE, fill=GROUP))+ geom_violin(trim=FALSE)
-p_greater0_violin<-p_greater0_violin%>%
-  + scale_y_continuous(breaks = seq(-25, 80, by = 20))%>%
-  
-  + labs(x= "Disease/Non-Disease Associated Genes", y="Number of Tissues", 
-         title= "Gene Expression >0 TPM ") %>%
-  
-  + theme(axis.title=element_text(size=14,face="bold"),
-          plot.caption=element_text(face = "italic", size=12, hjust = 0),
-          text = element_text(size=12),
-          axis.text.y= element_text(size=12),
-          axis.text.x= element_text(size=12))%>%
-  
-  +stat_summary(fun.data="mean_sdl", 
-                geom="pointrange", width=0.2, colour="black" )%>%
-  +stat_compare_means(method ="wilcox.test",label.y = 80,label.x = 1.5,paired = FALSE)    # Add global p-valu   # Add global p-valu
-
-
-p_greater0_violin
-
-### !!!!!!!!!!!!UNHASH TO SAVE PLOT !!!!!!!!
-library(cowplot)
-save_plot("./Plots/Human/Disease_Non-Disease/p_greater0_violin.jpeg",
-          p_greater0_violin ,base_height= 10 ,base_aspect_ratio = 2) 
-
-
-
-## CALCULATE THE MEAN AND SD
-
-HGNC.ID_0_MEAN_SD <- aggregate(VALUE~ GROUP, HGNC.ID_DISEASE_NON_DI_greater0, function(x) c(mean = mean(x), sd = sd(x)))
-
-HGNC.ID_0_MEAN_SD
-
- 
- 
- 
-################################################################################################################################
-## 0.1
+#~~~~~~~~~~~~DISEASE VS NON-DISEASE VIOLIN PLOT >0.1 ~~~~~~~~~~~~~~########################
 
 
 # Merge the HGNC.ID dataframes fro each threshold to get a disease and non-disease box-plot
@@ -1598,6 +962,10 @@ HGNC.ID_NO_DISEASE_0.1_nd["GROUP"] <- "Not Disease Associated" # That creates th
 
 HGNC.ID_DISEASE_NON_DI_0.1<- rbind(HGNC.ID_DISEASE_0.1_d, 
                                    HGNC.ID_NO_DISEASE_0.1_nd)
+
+
+###################################
+
 # # Make Violin plot
 
 
@@ -1622,11 +990,12 @@ p_0.1_violin<-p_0.1_violin%>%
 
 p_0.1_violin
 
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Disease_Non-Disease/p_0.1_violin.jpeg",
+#           p_0.1_violin ,base_height= 10 ,base_aspect_ratio = 2) 
+#  
 
-library(cowplot)
-save_plot("./Plots/Human/Disease_Non-Disease/p_0.1_violin.jpeg",
-          p_0.1_violin ,base_height= 10 ,base_aspect_ratio = 2) 
- 
 
 ### CALCULATE THE MEAN AND THE SD FOR EACH GROUP
 
@@ -1637,7 +1006,8 @@ HGNC.ID_0.1_MEAN_SD
 
 
 ################################################################################################################################
-## >1
+
+#~~~~~~~~~~~~DISEASE VS NON-DISEASE VIOLIN PLOT >1 ~~~~~~~~~~~~~~########################
 
 
 # Merge the HGNC.ID dataframes fro each threshold to get a disease and non-disease box-plot
@@ -1663,11 +1033,9 @@ HGNC.ID_DISEASE_NON_DI_1<- rbind(HGNC.ID_DISEASE_1_d,
 
 
 
+######################################
 
 # # Make Violin plot
-
-
-
 
 
 dev.new(width=60, height=30) # to open in a new window
@@ -1694,11 +1062,11 @@ p_1_violin__
 
 
 ##!!!!!UNHASH TO SAVE PLOT !!!!!!!
-
-library(cowplot)
-save_plot("./Plots/Human/Disease_Non-Disease/p_1_violin__.jpeg",
-          p_1_violin__ ,base_height= 10 ,base_aspect_ratio = 2) 
- 
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/Disease_Non-Disease/p_1_violin__.jpeg",
+#           p_1_violin__ ,base_height= 10 ,base_aspect_ratio = 2) 
+#  
 
 
 ### CALCULATE THE MEAN AND THE SD FOR EACH GROUP
@@ -1711,7 +1079,7 @@ HGNC.ID_1_MEAN_SD
 #####################################################################################################################################################
 ########################################################################################################################################################
 
-#FOR EACH HPO.DESCRIPTION COUNT THE NUMBER OF GENES EXPRESSED FOR ALL GENES WITH HPO.DESC WHICH ARE ALL DISEASE ASSOCIATED
+#~~~~FOR EACH HPO.DESCRIPTION COUNT THE NUMBER OF GENES EXPRESSED FOR ALL GENES WITH HPO.DESC WHICH ARE ALL DISEASE ASSOCIATED ~~~~~~~~~#########################
 
 
 
@@ -1743,6 +1111,7 @@ all_disease_genes_hpo_desc<- all_disease_genes_pheno_expression_expr%>%
 View(all_disease_genes_hpo_desc)
 all_disease_genes_hpo_desc<-all_disease_genes_hpo_desc%>%
   select_all()%>%
+  distinct(hpo.description,HGNC.ID) %>%
   dplyr::group_by(hpo.description,HGNC.ID) %>%
   dplyr::summarise(n=n()) %>%
   distinct()
@@ -1754,17 +1123,26 @@ all_disease_genes_hpo_desc_COUNT<-ungroup(all_disease_genes_hpo_desc)%>%
 
 names(all_disease_genes_hpo_desc)[names(all_disease_genes_hpo_desc)=="n"] <- "Frequency"
 
+names(all_disease_genes_hpo_desc)[names(all_disease_genes_hpo_desc)=="n"] <- "Frequency"
+
 all_disease_genes_hpo_desc_aggr<-aggregate(Frequency~ hpo.description, data = all_disease_genes_hpo_desc, sum)
 
+
+#The percentage of genes from the total number of genes known to have a HPO annotation
+
+all_disease_genes_hpo_desc_aggr$Percent<-(all_disease_genes_hpo_desc_aggr$Frequency/3838)*100 
 View(all_disease_genes_hpo_desc_aggr)
+
+
 
 ## PLOT THE DISEASE ASSOCIATED GENES FOR ALL GENES WITH TPM >0.1
 
 
+
 p_all_disease_genes_hpo_desc<-ggplot(data=all_disease_genes_hpo_desc_aggr
-                         , aes(x=reorder(all_disease_genes_hpo_desc_aggr$hpo.description,- all_disease_genes_hpo_desc_aggr$Frequency),
-                               y=all_disease_genes_hpo_desc_aggr$Frequency, 
-                               fill=all_disease_genes_hpo_desc_aggr$Frequency))
+                                     , aes(x=reorder(all_disease_genes_hpo_desc_aggr$hpo.description,- all_disease_genes_hpo_desc_aggr$Frequency),
+                                           y=all_disease_genes_hpo_desc_aggr$Frequency, 
+                                           fill=all_disease_genes_hpo_desc_aggr$Frequency))
 
 p_all_disease_genes_hpo_desc<-p_all_disease_genes_hpo_desc %>%
   
@@ -1792,11 +1170,51 @@ p_all_disease_genes_hpo_desc<-p_all_disease_genes_hpo_desc %>%
 
 
 ##!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!
+# 
+# library(cowplot)
+# save_plot("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.jpeg",
+#           p_all_disease_genes_hpo_desc ,base_height= 10 ,base_aspect_ratio = 2) 
+#  
 
-library(cowplot)
-save_plot("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.jpeg",
-          p_all_disease_genes_hpo_desc ,base_height= 10 ,base_aspect_ratio = 2) 
- 
+
+###PLOT PERCENTAGE
+p_all_disease_genes_hpo_desc_percent<-ggplot(data=all_disease_genes_hpo_desc_aggr
+                                     , aes(x=reorder(all_disease_genes_hpo_desc_aggr$hpo.description,- all_disease_genes_hpo_desc_aggr$Percent),
+                                           y=all_disease_genes_hpo_desc_aggr$Percent, 
+                                           fill=all_disease_genes_hpo_desc_aggr$Percent))
+
+p_all_disease_genes_hpo_desc_percent<-p_all_disease_genes_hpo_desc_percent %>%
+  
+  + labs(x= "Top-Level HPO Term", y="Percentage (%) of Genes with HPO Annotation", 
+         title= "Percentage (%) of Genes Associated to a Top-Level HPO Term")%>%
+  + scale_fill_gradient(low = "blue", 
+                        high = "red")%>% 
+  + scale_y_continuous(breaks = seq(0, 100, by = 10))%>%
+  + theme(legend.title = element_blank(),
+          legend.position = "none",
+          axis.title=element_text(size=14,face="bold"),
+          plot.caption=element_text(face = "italic", size=12, hjust = 0),
+          text = element_text(size=14),
+          axis.text.x= element_text(size=14),
+          panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
+  +geom_bar(stat = "identity")%>%    # to create a stacked barchart
+  +geom_text(show.legend = FALSE,aes(label=paste0(round(all_disease_genes_hpo_desc_aggr$Percent,0), "%")),size = 5, 
+             position = position_stack(vjust = 0.5), colour=c("black"), fontface='bold') %>%
+  
+  + coord_flip()
+
+
+#p_all_disease_genes_hpo_desc_percent
+
+
+
+##!!!!!UNHASH TO SAVE PLOT!!!!!!!!!!!
+# # 
+# library(cowplot)
+# save_plot("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc_percent.jpeg",
+#          p_all_disease_genes_hpo_desc_percent ,base_height= 10 ,base_aspect_ratio = 2) 
+# #  
+
 
 
 
@@ -1806,8 +1224,7 @@ save_plot("./Plots/Human/HPO.DESCRIPTION/p_all_disease_genes_hpo_desc.jpeg",
 #######################################################################################################################################################
 #########################################################################################################################################################
 
-## Load the 'GTEX.Tissues.to.HPO.txt' file so that the HPO.Descriptions 
-#for each threshold can be plotted against the tissues
+##~~~~~~~~Load the 'GTEX.Tissues.to.HPO.txt' file so that the HPO.Descriptions for each threshold can be plotted against the tissues ~~~~~~~~~~~~~#######################
 
 
 
@@ -1906,11 +1323,11 @@ GTEX.to.human_genes <- function(GTEX.Tissues ,human_genes, Abnormality,
     
     + coord_flip()
   
-  
-  library(cowplot)
-  save_plot(paste("./Plots/Human/System/", System_Threshold,".jpeg"),
-            GTEX.human_genes_cleaned_ABN_COUNT_p ,base_height= 10 ,base_aspect_ratio = 2) 
- 
+  # 
+  # library(cowplot)
+  # save_plot(paste("./Plots/Human/System/", System_Threshold,".jpeg"),
+  #           GTEX.human_genes_cleaned_ABN_COUNT_p ,base_height= 10 ,base_aspect_ratio = 2) 
+  # 
   
   }
 
@@ -2273,7 +1690,9 @@ GENE_FISHER_TEST<-function(df, Gene){
   
   
   # Keep rows that ARE the same (NOTE THERE MAY BE SOME GENES THAT DID NOT HAVE AN OBSERVED PHENOTYPE 
+  
   #BUT HAD A LINKED HPO.DESC THEREFORE THEY MAY HAVE NAS)
+  
   linked_PHENO<-right_join(pheno_cleaned_Tissues_,linked.hpo.desc, by=c("HGNC.ID"="HGNC.ID","HPO.superclass.description"="hpo.description")) # keep rows with matching ID
   
   # Remove NAs, genes that have linked  expression but no tissues or expression linked 
@@ -2406,77 +1825,19 @@ GENE_FISHER_TEST<-function(df, Gene){
   
   }
 
-
+## TEST FUNCTION
 Gene_FISHER_TEST(df=human_genes_TPM_1_pheno, Gene="HGNC:1382")  
   
+#########################################################################################
 
-###########~~~~~~~~~~~~~~~~USE OF FOR-LOOP ~~~~~#
+
+###########~~~~~~~~~~~~~~~~USE OF FOR-LOOP ~~~~~~~~~~~~~~###########################
 
 #THE FOR LOOP ITERATES THROUGH THE all_disease_genes_pheno_Tissues DATAFRAME WHICH HAS ALL TISSUES AND HPO.DESC(TOPLEVEL)
 
 # CREATE A data frame with two columns and 55 rows, WHICH HAS THE TISSUE NAMES, HPO.SUPERCLASS AND AN EMPTY COLUMN
-View(all_genes2)
-
-
-
-#View(human_genes_TPM_greater0_pheno)
 
 ## !!!!!!!!!!!!!!!!!!!!!!!!! LOOPS HAVE BEEN '#' HASHED OUT PLS REMOVE '#' !!!!!
-
-
-## TPM >0 TPM (Yes is for genes that have a gene expression of >0):
- 
-
-# NO GENE EXPRESSION 
-# PVALUE_GENE_Greater0 <- data.frame(all_genes2,
-#                                   P.VALUE=vector(length=3678)) 
-
-# for(i in 1:nrow(all_genes2)) {
-#   ii <- all_genes2[i,1]     #FIRST COLUMN
-#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-# 
-#   
-#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-#   
-#   PVAL<-Gene_FISHER_TEST(df=human_genes_TPM_greater0_pheno, Gene= paste(ii)) 
-# 
-#   print(PVAL)                  # THE PVALUE IS PRINTED
-#   
-#   PVALUE_GENE_None$P.VALUE[i]<-paste(PVAL)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-#   
-#   }
-# 
-# write.csv(PVALUE_GENE_Greater0,'./Output_Files/Human/PVALUE_GENE_Greater0.csv')
-#   
-
-
-
-
-## No gene expression (Yes is for genes that have a gene expression of 0)
-
-# 
-# PVALUE_GENE_None <- data.frame(all_genes2,
-#                                P.VALUE=vector(length=3678)) 
-
-
-#View(human_genes_TPM_greater0_pheno)
-# 
-# for(i in 1:nrow(all_genes2)) {
-#   ii <- all_genes2[i,1]     #FIRST COLUMN
-#   print(ii)                                     # TO CHECK IF THE CORRECT ROW IS BEING TAKEN
-#   
-#   
-#   ## THE OUTCOME OF THE FUNCTION IS SAVED AS PVAL WHICH IS THE FISHER TEST PVALUE 
-#   
-#   PVALN<-Gene_FISHER_TEST(df=human_genes_TPM_None_pheno, Gene= paste(ii)) 
-#   
-#   print(PVALN)                  # THE PVALUE IS PRINTED
-#   
-#   PVALUE_GENE_None$P.VALUE[i]<-paste(PVALN)              # THE PVALUE IS ADDED INTO THE DF CREATED ABOVE
-#   
-# }
-# 
-# write.csv(PVALUE_GENE_None,'./Output_Files/Human/PVALUE_GENE_None.csv')
 
 
 
@@ -2542,39 +1903,6 @@ View(all_genes2)
 #######~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ADJUST PVALUE FOR ALL THRESHOLDS~~~~~~~~~~~~~~~~~~~~~~~~~~~#################
 
 
-## Gene Expression >0
-PVALUE_GENE_Greater0<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_Greater0.csv")
-
-PVALUE_GENE_Greater0<-PVALUE_GENE_Greater0%>%
-  select(HGNC.ID, P.VALUE)%>%
-  distinct()
-#View(PVALUE_GENE_Greater0)
-
-## The Benjamini & Hochberg (1995) "BH" was used 
-
-PVALUE_GENE_Greater0$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_Greater0$P.VALUE, method="BH")
-
-View(PVALUE_GENE_Greater0)
-
-
-## Gene Expression =0
-
-
-PVALUE_GENE_None<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/PVALUE_GENE_None.csv")
-
-PVALUE_GENE_None<-PVALUE_GENE_None%>%
-  select(HGNC.ID, P.VALUE)%>%
-  distinct()
-#View(PVALUE_GENE_None)
-
-## The Benjamini & Hochberg (1995) "BH" was used 
-
-PVALUE_GENE_None$Adjusted.Pvalue<-p.adjust(PVALUE_GENE_None$P.VALUE, method="BH")
-
-View(PVALUE_GENE_None)
-
-
-
 ## Gene Expression >0.1
 
 
@@ -2616,7 +1944,7 @@ View(PVALUE_GENE_1)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PREPARE DATAFRAMES FOR GEA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~############
 
 
-## Get teh Entrez Gene IDs for each gene (From the first dataframe human_gene)
+## Get the Entrez Gene IDs for each gene (From the first dataframe human_gene)
 
 human_genes_with_GENE_ID_<-human_genes_with_GENE_ID%>%
   select(HGNC.ID, gene_id)%>%
@@ -2625,46 +1953,6 @@ human_genes_with_GENE_ID_<-human_genes_with_GENE_ID%>%
 View(human_genes_with_GENE_ID_)
 
 
-## >0 
-
-PVALUE_GENE_Greater0_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_Greater0, by=c("HGNC.ID" ="HGNC.ID" ) )
-
-
-PVALUE_GENE_Greater0_entrez<-PVALUE_GENE_Greater0_entrez%>%
-  select(gene_id, Adjusted.Pvalue)%>%
-  distinct()
-
-View(PVALUE_GENE_Greater0_entrez)
-
-
-# Filter <0.05
-
-Greater0.test.set<- PVALUE_GENE_Greater0_entrez %>%
-  select(gene_id, Adjusted.Pvalue)%>%
-  filter(Adjusted.Pvalue <= 0.05)%>%
-  distinct(gene_id, Adjusted.Pvalue)
-
-View(Greater0.test.set)
-
-## No gene expression
-
-PVALUE_GENE_None_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_None, by=c("HGNC.ID" ="HGNC.ID" ) )
-
-
-PVALUE_GENE_None_entrez<-PVALUE_GENE_None_entrez%>%
-  select(gene_id, Adjusted.Pvalue)%>%
-  distinct()
-View(PVALUE_GENE_None_entrez)
-
-
-# Filter <0.05
-
-None.test.set<- PVALUE_GENE_None_entrez %>%
-  select(gene_id, Adjusted.Pvalue)%>%
-  filter(Adjusted.Pvalue <= 0.05)%>%
-  distinct(gene_id, Adjusted.Pvalue)
-
-View(None.test.set)
 
 ## >=/= 0.1 expression
 
@@ -2686,7 +1974,7 @@ test.set_0.1<- PVALUE_GENE_0.1_entrez %>%
 
 View(test.set_0.1)
 
-
+#####################################
 
 ## >=/= 1 expression
 
@@ -2696,39 +1984,17 @@ PVALUE_GENE_1_entrez<-right_join(human_genes_with_GENE_ID_, PVALUE_GENE_1, by=c(
 PVALUE_GENE_1_entrez<-PVALUE_GENE_1_entrez%>%
   select(gene_id, Adjusted.Pvalue)%>%
   distinct()
-# 
-# # remove "." from the entrez gene ids
-# 
-# t<-t(data.frame(strsplit(PVALUE_GENE_1_entrez$gene_id, ".", fixed = TRUE)))
-# View(t)
-# t<-data.frame(t)
-# PVALUE_GENE_1_entrez$GENE_SPLIT<-t$X1
-# view(PVALUE_GENE_1_entrez)
-# 
-
-# Keep only the gene ids that don't have a "." with the pvalue
-
-
-PVALUE_GENE_1_entrez<-PVALUE_GENE_1_entrez%>%
-  select(GENE_SPLIT, Adjusted.Pvalue)%>%
-  distinct()
-
-
-# Make the dataframe into a vector
-
-PVALUE_GENE_1_entrez<-as.vector(PVALUE_GENE_1_entrez)
-
 View(PVALUE_GENE_1_entrez)
+
 
 # Filter <0.05
 
-
 test.set_1<- PVALUE_GENE_1_entrez %>%
-  select(GENE_SPLIT, Adjusted.Pvalue)%>%
+  select(gene_id, Adjusted.Pvalue)%>%
   filter(Adjusted.Pvalue <= 0.05)%>%
-  distinct(GENE_SPLIT, Adjusted.Pvalue)
+  distinct(gene_id, Adjusted.Pvalue)
 
-
+View(test.set_1)
 
 # Make the dataframe into a vector
 
@@ -2746,51 +2012,48 @@ View(test.set_1)
 ############# LOAD PACKAGES ###########################################################
 # !!!!!!!!!!!!!!!!!!!!! REMOVE THE "#" TO RUN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
-# source("https://bioconductor.org/biocLite.R")
-# biocLite("org.Hs.eg.db")
-# # 
-# source("https://bioconductor.org/biocLite.R") 
-# biocLite("GOstats") 
+source("https://bioconductor.org/biocLite.R")
+biocLite("org.Hs.eg.db")
 
-# 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# # The following initializes usage of Bioc devel
-# BiocManager::install(version='devel')
-# 
-# BiocManager::install("BiocGenerics")
-# 
-# 
-# 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("org.Hs.eg.db")
-# 
-# 
-# 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("GOstats")
-# 
-# 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("multtest")
-# 
-# 
-# 
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("GO.db")
-# 
-# library(org.Hs.eg.db);library(GOstats);library(multtest); library(GO.db)
-# # 
-# 
+source("https://bioconductor.org/biocLite.R") 
+biocLite("GOstats") 
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+#The following initializes usage of Bioc devel
+
+BiocManager::install(version='devel')
+ 
+BiocManager::install("BiocGenerics")
+
+ 
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("org.Hs.eg.db")
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("GOstats")
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("multtest")
+
+ 
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+
+BiocManager::install("GO.db")
+
+
+library(org.Hs.eg.db);library(GOstats);library(multtest); library(GO.db)
 
 ##############################################################################################
 
@@ -2798,117 +2061,66 @@ View(test.set_1)
 ###### FUNCTION FOR THE GEA ###################
 
 
-
-#!!!!!!!!!! UNHASH TO RUN THE FUNCTION !!!!!!!!!!!!!!!!
-
-#go.enrichment <- function(test.set,reference.set,ontology.type ="BP",label=NULL) {
+go.enrichment <- function(test.set,reference.set,ontology.type ="BP",label=NULL) {
    
    
  
-#   GO.param <- new("GOHyperGParams",
-#                   
-#                   geneIds = test.set,
-#                   
-#                   universeGeneIds = reference.set,
-#                   
-#                   ontology = ontology.type,
-#                   
-#                   annotation = "org.Hs.eg.db",
-#                   
-#                   testDirection = "over",
-#                   
-#                   pvalueCutoff = 1,
-#                   
-#                   conditional = T)
-#   
-#   
-#   
-#   GO.sign.results <- as.data.frame(summary(hyperGTest(GO.param))) %>%
-#     
-#     mutate (Pvalue.BH = p.adjust(Pvalue,method="BH")) %>%
-#     
-#     filter(Pvalue.BH < 0.05) %>%
-#     
-#     dplyr::select(1,3:7,2,8)
-#   
-#   
-#   
-#   
-#   
-#   if(missing(label)) {
-#     
-#     
-#     
-#     return(GO.sign.results)
-#     
-#     
-#     
-#   } else {
-#     
-#     
-#     
-#     return(GO.sign.results %>%
-#              
-#              mutate(Category = label))
-#     
-#     
-#     
-#   }
-#   
-#   
-#   
-# }
+ GO.param <- new("GOHyperGParams",
+                 
+                 geneIds = test.set,
+                 
+                 universeGeneIds = reference.set,
+                 
+                 ontology = ontology.type,
+                 
+                 annotation = "org.Hs.eg.db",
+                 
+                 testDirection = "over",
+               
+                 pvalueCutoff = 1,
+                 
+                 conditional = T)
+ 
+ 
+   
+  GO.sign.results <- as.data.frame(summary(hyperGTest(GO.param))) %>%
+   
+   mutate (Pvalue.BH = p.adjust(Pvalue,method="BH")) %>%
+   
+   filter(Pvalue.BH < 0.05) %>%
+   
+   dplyr::select(1,3:7,2,8)
+ 
+ 
+ 
+ 
+ 
+ if(missing(label)) {
+   
+   
+   
+   return(GO.sign.results)
+   
+   
+   
+  } else {
+   
+   
+   
+   return(GO.sign.results %>%
+          
+            mutate(Category = label))
+   
+   
+   
+ }
+ 
+ 
+}
 
-
+######################################################################################################################
 
 #######~~~~~~~~~~~~~~~~~RUN GEA FUNCTION FOR >0.1 & >1 TPM FOR BP, CC, MF ~~~~~~~~~~~~~~~~##############
-
-##########!!!!!!!!!!!!!!!!!!!!!!UNHASH TO RUN CODE !!!!!!!!!!!!!!!!!!!!!############################
-
-
-
-#################################### TPM >1 #########################################################################################
-
-
-
-################################ Biological Pathway ################################################################################
-
-#go.enrichment_BP_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="BP",label=NULL)
-
-#write.csv(go.enrichment_BP_1,'./Output_Files/Human/go.enrichment_BP_1.csv')
-
-##########################################################################################
-
-
-
-############################### Cellular Component #################################################
-
-#go.enrichment_CC_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="CC",label=NULL)
-
-#write.csv(go.enrichment_CC_1,'./Output_Files/Human/go.enrichment_CC_1.csv')
-
-#############################################################################################
-
-
-
-############################## Molecular Function ##################################################
-
-#go.enrichment_MF_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="MF",label=NULL)
-
-#write.csv(go.enrichment_MF_1,'./Output_Files/Human/go.enrichment_MF_1.csv')
-
-################################################################################################################
-
-
-
-
-# VIEW DFS FOR >1TPM RUNS ##########################################################
-
-# View(go.enrichment_BP_1)
-# View(go.enrichment_CC_1)
-# View(go.enrichment_MF_1)
-
-############################################################################################## 
 
 
 ###################################### TPM >0.1 #################################################
@@ -2916,9 +2128,9 @@ View(test.set_1)
 
 ##################################### Biological Pathway ############################################
 
-#go.enrichment_BP_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="BP",label=NULL)
+go.enrichment_BP_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="BP",label=NULL)
 
-#write.csv(go.enrichment_BP_0.1,'./Output_Files/Human/go.enrichment_BP_0.1.csv')
+write.csv(go.enrichment_BP_0.1,'./Output_Files/Human/go.enrichment_BP_0.1.csv')
 
 #########################################################################################################
 
@@ -2926,9 +2138,9 @@ View(test.set_1)
 
 #################################### Cellular Component #########################################################
 
-#go.enrichment_CC_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="CC",label=NULL)
+go.enrichment_CC_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="CC",label=NULL)
 
-#write.csv(go.enrichment_CC_0.1,'./Output_Files/Human/go.enrichment_CC_0.1.csv')
+write.csv(go.enrichment_CC_0.1,'./Output_Files/Human/go.enrichment_CC_0.1.csv')
 
 #########################################################################################################################
 
@@ -2936,15 +2148,60 @@ View(test.set_1)
 
 ###################################### Molecular Function #######################################################################
 
-#go.enrichment_MF_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="MF",label=NULL)
+go.enrichment_MF_0.1<-go.enrichment(test.set =test.set_0.1 ,reference.set=PVALUE_GENE_0.1_entrez,ontology.type ="MF",label=NULL)
 
-#write.csv(go.enrichment_MF_0.1,'./Output_Files/Human/go.enrichment_MF_0.1.csv')
+write.csv(go.enrichment_MF_0.1,'./Output_Files/Human/go.enrichment_MF_0.1.csv')
 
 ######################################################################################################################################
 
 ## VIEW DFS FOD >0.1 RUNS 
 
 
-# View(go.enrichment_BP_0.1)
-# View(go.enrichment_CC_0.1)
-# View(go.enrichment_MF_0.1)
+View(go.enrichment_BP_0.1)
+View(go.enrichment_CC_0.1)
+View(go.enrichment_MF_0.1)
+
+
+############~~~~~~~~~~~~~~~~~~~~~~~~~TPM >1~~~~~~~~~~~~~~~~~~~~~~~~~ #########################################################################################
+
+
+
+################################ Biological Pathway ################################################################################
+
+go.enrichment_BP_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="BP",label=NULL)
+
+write.csv(go.enrichment_BP_1,'./Output_Files/Human/go.enrichment_BP_1.csv')
+
+##########################################################################################
+
+
+
+############################### Cellular Component #################################################
+
+go.enrichment_CC_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="CC",label=NULL)
+
+write.csv(go.enrichment_CC_1,'./Output_Files/Human/go.enrichment_CC_1.csv')
+
+#############################################################################################
+
+
+
+############################## Molecular Function ##################################################
+
+go.enrichment_MF_1<-go.enrichment(test.set =test.set_1 ,reference.set=PVALUE_GENE_1_entrez,ontology.type ="MF",label=NULL)
+
+write.csv(go.enrichment_MF_1,'./Output_Files/Human/go.enrichment_MF_1.csv')
+
+################################################################################################################
+
+
+
+# VIEW DFS FOR >1TPM RUNS ##########################################################
+
+View(go.enrichment_BP_1)
+View(go.enrichment_CC_1)
+View(go.enrichment_MF_1)
+
+############################################################################################## 
+
+
