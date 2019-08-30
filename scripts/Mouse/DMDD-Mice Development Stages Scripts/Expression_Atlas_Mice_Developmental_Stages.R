@@ -13,7 +13,7 @@
 
 ## load packages ##############################################################################################################
 
-library(dplyr);library(tidyr);library(stringr);library(readr);library(tidyverse);library(ggpubr);library(ggplot2)
+library(dplyr);library(tidyr);library(readr);library(tidyverse);library(ggpubr);library(ggplot2)
 
 ################################################################################################################################
 ################################################################################################################################
@@ -48,6 +48,20 @@ mgi.ensembl.genemapping$Gene.ID<-as.character(mgi.ensembl.genemapping$Gene.ID)
 MGI.EA.Mouse.Development<-right_join(EA.Mouse.Development,mgi.ensembl.genemapping, by=c("Gene ID"="Gene.ID") )
 
 View(MGI.EA.Mouse.Development)
+
+
+###############################################################################################################
+##############################################################################################################################
+
+## Count the number of genes in this WT DMDD dataset
+
+Count_MGI.EA.Mouse.Development<-MGI.EA.Mouse.Development%>%
+  select(MGI.Accession.ID)%>%
+  drop_na()%>%
+  distinct()
+
+View(Count_MGI.EA.Mouse.Development)
+nrow(Count_MGI.EA.Mouse.Development)
 
 
 
@@ -131,7 +145,7 @@ sort_MEAN.MGI.EMBRYO_<-sort_MEAN.MGI.EMBRYO%>%
   select(`Development Stage` , Expression, MP.DESCRIPTION)%>%
   group_by(`Development Stage`, MP.DESCRIPTION)%>%
   mutate(Mean= mean(Expression, na.rm = TRUE), SD=sd(Expression, na.rm = TRUE),
-         SE= sd(Expression, na.rm = TRUE)/sqrt(length(Expression)))
+         SE= sd(Expression, na.rm = TRUE)/sqrt(length(Expression)))%>%
   distinct(MP.DESCRIPTION, Mean, SE, SD, `Development Stage`)
 
 View(sort_MEAN.MGI.EMBRYO_)
@@ -177,12 +191,12 @@ MEAN.Pheno.Mouse.Development_P1<-ggplot(sort_MEAN.MGI.EMBRYO_, aes(x =sort_MEAN.
 
 
 ##!!!UNHASH TO SAVE PLOT!!! 
-
-library(cowplot)
 # 
-save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN.Pheno.Mouse.Development_P1.png"),
-          MEAN.Pheno.Mouse.Development_P1 ,  base_width=900, base_height=900, units="mm") 
-# #  
+# library(cowplot)
+# # 
+# save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN.Pheno.Mouse.Development_P1.png"),
+#           MEAN.Pheno.Mouse.Development_P1 ,  base_width=900, base_height=900, units="mm") 
+# # #  
 
 
 
@@ -221,12 +235,12 @@ MEAN.Pheno.Mouse.Development_P2<-ggplot(sort_MEAN.MGI.EMBRYO_, aes(x =sort_MEAN.
 
 
 ##!!!UNHASH TO SAVE PLOT!!! 
-
-library(cowplot)
 # 
-save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN.Pheno.Mouse.Development_P2.png"),
-          MEAN.Pheno.Mouse.Development_P2 ,  base_width=297, base_height=210, units="mm") 
-# #  
+# library(cowplot)
+# # 
+# save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN.Pheno.Mouse.Development_P2.png"),
+#           MEAN.Pheno.Mouse.Development_P2 ,  base_width=297, base_height=210, units="mm") 
+# # #  
 
 
 
@@ -479,9 +493,6 @@ Pheno.Mouse.Development<-MGI.TOP.MP.EA.Mouse.Development%>%
 
 sort_MEAN.Pheno.Mouse.Development<-Pheno.Mouse.Development
 
-#library(gtools)
-#sort_MEAN.Pheno.Mouse.Development$`Development Stage`<-mixedsort(sort_MEAN.Pheno.Mouse.Development$`Development Stage`)
-
 
 sort_MEAN.Pheno.Mouse.Development$`Development Stage` <- factor(sort_MEAN.Pheno.Mouse.Development$`Development Stage`,
                                                                 levels=rev(unique(sort_MEAN.Pheno.Mouse.Development$`Development Stage`)))
@@ -543,13 +554,13 @@ MEAN.Pheno.Mouse.Development_P1<-ggplot(sort_MEAN.Pheno.Mouse.Development, aes(x
 MEAN.Pheno.Mouse.Development_P1
 
 # # 
-# # 
- library(cowplot)
+# # # 
+#  library(cowplot)
+# # #     
+# save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN_PHENO_EXPRESSION.png"),
+#             MEAN.Pheno.Mouse.Development_P1 ,base_height= 10 ,base_aspect_ratio = 2) 
+# # #     
 # #     
-save_plot(paste("./Plots/Mouse/EA_Developmental_Stages/Mean gene expression/MEAN_PHENO_EXPRESSION.png"),
-            MEAN.Pheno.Mouse.Development_P1 ,base_height= 10 ,base_aspect_ratio = 2) 
-# #     
-#     
 
 
 
