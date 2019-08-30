@@ -1,7 +1,7 @@
 # PhenoExpression
 Phenotypes and Gene Expression Project
 
-This project aims to link genotype, gene expression as well as the organism's phenotype by:
+This project aims to understand the connection between genotype and gene expression as well as organismal phenotypes by:
 
 * Investigating differential gene expression in KO and WT mice in different physiological systems. 
 * Exploring gene expression and viability in different mice embryonic stages. 
