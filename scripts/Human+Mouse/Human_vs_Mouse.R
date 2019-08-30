@@ -22,8 +22,6 @@ library(dplyr);library(tidyr);library(readr);library(tidyverse);library(ggpubr)
 
 human.mouse.orthologs<-read_delim("D:/MSC RESEARCH PROJECT/GITHUB/data/human.mouse.orthologs.txt",delim = "\t", skip = 1)
 
-human_greater0_pheno<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/Human/Expression_greater_0/human_genes_TPM_greater0_pheno.csv")
-
 human_0.1_pheno<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/Human/Expression_0.1/human_genes_TPM_0.1_pheno.csv")
 
 human_1_pheno<-read_csv("D:/MSC RESEARCH PROJECT/Output_Files/Human/Expression_1/human_genes_TPM_1_pheno.csv")
@@ -51,14 +49,6 @@ source(file="D:/MSC RESEARCH PROJECT/Scripts/Human+Mouse/clean_df_FUNCTION.R")
 
 ## Use function to clean the dfs
 
-human_greater0_pheno_cleaned <-clean_df(human_greater0_pheno)
-
-names(human_greater0_pheno_cleaned)[names(human_greater0_pheno_cleaned)=="Expression"] <- "TPM > 0 TPM"
-
-#View(human_greater0_pheno_cleaned)
-
-##################
-
 human_0.1_pheno_cleaned <-clean_df(human_0.1_pheno)
 
 names(human_0.1_pheno_cleaned)[names(human_0.1_pheno_cleaned)=="Expression"] <- "TPM >/= 0.1 TPM"
@@ -66,28 +56,29 @@ names(human_0.1_pheno_cleaned)[names(human_0.1_pheno_cleaned)=="Expression"] <- 
 View(human_0.1_pheno_cleaned)
 
 #############
+
 human_1_pheno_cleaned <-clean_df(human_1_pheno)
 
 
 names(human_1_pheno_cleaned)[names(human_1_pheno_cleaned)=="Expression"] <- "TPM >/= 1 TPM"
 
 
-str(human_1_pheno_cleaned)
+View(human_1_pheno_cleaned)
 
-###########
+########################################################################################################
+##################################################################################################################
 
-All_genes_expression<- right_join(human_greater0_pheno_cleaned,
-                                  human_0.1_pheno_cleaned, by=c("HGNC.ID"="HGNC.ID", 
+## Join the two dfs
+
+All_genes_expression<- right_join(human_0.1_pheno_cleaned,
+                                  human_1_pheno_cleaned, by=c("HGNC.ID"="HGNC.ID", 
                                                                     "GTEX.tissues"="GTEX.tissues",
                                                                     "HPO.superclass.description"="HPO.superclass.description"))
 
+View(All_genes_expression)
 
-All_genes_expression<- right_join(All_genes_expression,
-                                  human_1_pheno_cleaned, by=c("HGNC.ID"="HGNC.ID", 
-                                                                     "GTEX.tissues"="GTEX.tissues",
-                                                                     "HPO.superclass.description"="HPO.superclass.description"))
 
-#View(All_genes_expression)
+## !!!!!!!!!!!!! UNHASH TO SAVE FILE !!!!!!!!!!!!!!1
 
 
 #write.csv(All_genes_expression,"D:/MSC RESEARCH PROJECT/Output_Files/Human/All_genes_expression.csv") 
@@ -125,17 +116,30 @@ Mice.mutant.expression.clean<- mgi.genepheno.tissue.ts28_wt_mutant%>%
 ## mgi.phenotypes: "MP.DESCRIPTION" ==  Mice.mutant.expression.clean: "MP.Term"
 
 names(mgi.phenotypes)[names(mgi.phenotypes)=="MP.DESCRIPTION"] <- "MP.Term"
-# 
-Mice.mutant.expression.phenotypes<-merge(Mice.mutant.expression.clean,
+
+
+ 
+Mice.mutant.all.expression.phenotypes<-merge(Mice.mutant.expression.clean,
                                               mgi.phenotypes)
 
-View(Mice.mutant.expression.phenotypes)
+View(Mice.mutant.all.expression.phenotypes)
 
-#View(Mice.mutant.expression.phenotypes)
 
-Mice.mutant.expression.phenotypes<-Mice.mutant.expression.phenotypes%>%
+
+
+
+
+
+
+
+
+########################################################################################################
+#######################################################################################################################
+
+### Filter to only count genes with an expression
+
+Mice.mutant.expression.phenotypes<-Mice.mutant.all.expression.phenotypes%>%
   select_all()%>%
-  filter(TS28.mutant.expression.detected== "Yes")%>%
   drop_na()%>%
   distinct()
 
@@ -161,7 +165,23 @@ Mouse.Expression.pheno.hpo<-merge(Mice.mutant.expression.phenotypes, hp.mp.tople
 
 names(Mouse.Expression.pheno.hpo)[names(Mouse.Expression.pheno.hpo)=="hp.top.description"] <- "HPO.superclass.description"
 
-#View(Mouse.Expression.pheno.hpo)
+
+#### JOIN THE HGNC.ID/MGI.IF MAPPINGS TO MOUSE EXPRESSION
+
+Mouse.Expression.pheno.hpo<-left_join(Mouse.Expression.pheno.hpo,
+                                            human.mouse.orthologs, by=c("MGI.ID"="MGI.ID"))
+
+View(Mouse.Expression.pheno.hpo)
+
+
+##COUNT THE NUMBER OF MOUSE GENES 
+countMOUSE<-Mouse.Expression.pheno.hpo%>%
+  select(MGI.ID, TS28.mutant.expression.detected)%>%
+  filter(TS28.mutant.expression.detected=="Yes")%>%
+  distinct(MGI.ID)
+
+nrow(countMOUSE)
+
 
 ##############################################################################################################################
 ############################################################################################################################
@@ -174,9 +194,10 @@ Human_genes_expression_orthologs<-Human_genes_expression_orthologs%>%
   drop_na()%>%
   distinct()
 
-#View(Mouse.Expression.pheno.hpo)
+#View(Human_genes_expression_orthologs)
 ## merge
-Human.Mouse.Expression.pheno.hpo<-merge(Mouse.Expression.pheno.hpo, Human_genes_expression_orthologs)
+Human.Mouse.Expression.pheno.hpo<-merge(Mouse.Expression.pheno.hpo,
+                                        Human_genes_expression_orthologs)
 
 ## clean
 Human.Mouse.Expression.pheno.hpo<-Human.Mouse.Expression.pheno.hpo%>%
@@ -187,12 +208,6 @@ View(Human.Mouse.Expression.pheno.hpo)
 
 
 
-##COUNT THE NUMBER OF MOUSE GENES 
-countMOUSE<-Human.Mouse.Expression.pheno.hpo%>%
-  select(MGI.ID)%>%
-  distinct()
-
-View(countMOUSE)
 
 
 
@@ -202,239 +217,280 @@ View(countMOUSE)
 
 ############################################################################################################################
 
-## Make the human gene expression into counts
+## Count the number of Human Genes with Mice Orthologs
 
 
-
-Human_genes_expression_0<- Human_genes_expression_orthologs%>%
-  select(HPO.superclass.description,HGNC.ID, `TPM > 0 TPM` )%>%
-  filter(`TPM > 0 TPM`  == "Yes")%>%
-  distinct()
-
-Human_genes_expression_0<-Human_genes_expression_0%>%
-  select_all()%>%
-  dplyr::group_by(HPO.superclass.description,HGNC.ID) %>%
-  dplyr::summarise("Number of genes at > 0 TPM"=n()) %>%
-  distinct()
-#View(Human_genes_expression_0)
-
-
-Human_genes_expression_0<-aggregate(`Number of genes at > 0 TPM`~ HPO.superclass.description, data = Human_genes_expression_0, sum)
-
-#View(Human_genes_expression_0)
 
 ## 0.1
-
-## FILTER ONLY 'YES' EXPRESSION
+View(Human_genes_expression_orthologs)
 
 Human_genes_expression_0.1_<- Human_genes_expression_orthologs%>%
-  select(HPO.superclass.description,HGNC.ID, `TPM >/= 0.1 TPM` )%>%
-  filter(`TPM >/= 0.1 TPM`  == "Yes")%>%
+  select(HPO.superclass.description,HGNC.ID,GTEX.tissues, `TPM >/= 0.1 TPM` )%>%
+  filter(`TPM >/= 0.1 TPM`=="Yes")%>%
   distinct()
-
-
 
 ## COUNT THE NUMBER OF GENES EXPRESSED
 counthuman_0.1<-Human_genes_expression_0.1_%>%
   select(HGNC.ID)%>%
   distinct()
 
-View(counthuman_0.1)
+nrow(counthuman_0.1)
+
+###################
+## Count the number of Human genes with Similar HPO/MP terms
 
 
-## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH HPO TERM
-Human_genes_expression_0.1<-Human_genes_expression_0.1%>%
-  select_all()%>%
-  dplyr::group_by(HPO.superclass.description,HGNC.ID) %>%
-  dplyr::summarise("Number of genes at > 0.1 TPM"=n()) %>%
+Human_genes_expression_0.1.top<- Human.Mouse.Expression.pheno.hpo%>%
+  select(HPO.superclass.description,HGNC.ID,GTEX.tissues, `TPM >/= 0.1 TPM` )%>%
   distinct()
-View(Human_genes_expression_0.1)
 
-Human_genes_expression_0.1<-aggregate(`Number of genes at > 0.1 TPM` ~ HPO.superclass.description, 
-                                      data = Human_genes_expression_0.1, sum)
+## COUNT THE NUMBER OF GENES EXPRESSED
+counthuman_0.1_top<-Human_genes_expression_0.1.top%>%
+  select(HGNC.ID)%>%
+  distinct()
 
-#View(Human_genes_expression_0.1)
+nrow(counthuman_0.1_top)
+
 
 ## 1
 
-## FILTER ONLY 'YES' EXPRESSION
+
 Human_genes_expression_1_<- Human_genes_expression_orthologs%>%
-  select(HPO.superclass.description,HGNC.ID, `TPM >/= 1 TPM` )%>%
-  filter(`TPM >/= 1 TPM`  == "Yes")%>%
+  select(HPO.superclass.description,HGNC.ID, GTEX.tissues,`TPM >/= 1 TPM` )%>%
+  filter(`TPM >/= 1 TPM`=="Yes")%>%
   distinct()
+
+
 
 ## COUNT THE NUMBER OF GENES EXPRESSED
 counthuman_1<-Human_genes_expression_1_%>%
   select(HGNC.ID)%>%
   distinct()
 
-View(counthuman_1)
-
-
-## COUNT THE NUMBER OF GENES EXPRESSED FOR EACH HPO TERM
-
-Human_genes_expression_1<-Human_genes_expression_1_%>%
-  select_all()%>%
-  dplyr::group_by(HPO.superclass.description,HGNC.ID) %>%
-  dplyr::summarise("Number of genes at > 1 TPM"=n()) %>%
-  distinct()
-View(Human_genes_expression_1)
+nrow(counthuman_1)
 
 
 
-
-Human_genes_expression_1<-aggregate(`Number of genes at > 1 TPM` ~ HPO.superclass.description, 
-                                      data = Human_genes_expression_1, sum)
+########
 
 
-# change column names
 
-#names(Human_genes_expression_COUNT_0)[names(Human_genes_expression_COUNT_0)=="n"] <- "Number of genes at > 0 TPM"
-names(Human_genes_expression_0)[names(Human_genes_expression_0)=="TPM > 0 TPM"] <- "Expression"
-
-#names(Human_genes_expression_COUNT_0.1)[names(Human_genes_expression_COUNT_0.1)=="n"] <- "Number of genes at > 0.1 TPM"
-
-names(Human_genes_expression_0.1)[names(Human_genes_expression_0.1)=="TPM >/= 0.1 TPM"] <- "Expression"
-
-#names(Human_genes_expression_COUNT_1)[names(Human_genes_expression_COUNT_1)=="n"] <- "Number of genes at > 1 TPM"
-
-names(Human_genes_expression_1)[names(Human_genes_expression_1)=="TPM >/= 1 TPM"] <- "Expression"
+################################################################################################################
 
 ## merge
-Human_genes_expression_COUNT<- merge(Human_genes_expression_0,Human_genes_expression_0.1)
+Human_genes_expression_ALL<- merge(Human_genes_expression_0.1_, Human_genes_expression_1_)
 
-Human_genes_expression_COUNT<- merge(Human_genes_expression_COUNT,Human_genes_expression_1)
+#########################################################################################################
 
 ## clean
-Human_genes_expression_COUNT<-Human_genes_expression_COUNT%>%
+Human_genes_expression_ALL<-Human_genes_expression_ALL%>%
   select_all()%>%
   drop_na()%>%
   distinct()
 
-#View(Human_genes_expression_COUNT)
+#View(Human_genes_expression_ALL)
 
 
 
 #####################################################################################################################
 ################################################################################################################################
 
-# Make the mouse gene expression into counts
-
-Mouse.Expression.COUNT<- Mice.mutant.expression.phenotypes%>%
-  select( TS28.mutant.expression.detected, mp.description, MGI.ID )%>%
-  dplyr::group_by(mp.description,MGI.ID) %>%
-  dplyr::summarise(Knockout.Mice =n()) %>%
-  distinct(mp.description,MGI.ID,Knockout.Mice)
-
-#View(Mouse.Expression.COUNT)
-
-Mouse.Expression.COUNT<-aggregate(Knockout.Mice ~ mp.description, 
-                                    data = Mouse.Expression.COUNT, sum)
-
-#View(Mouse.Expression.COUNT)
-
-#change column name
-#names(Mouse.Expression.COUNT)[names(Mouse.Expression.COUNT)=="TS28.mutant.expression.detected"] <- "Expression"
+# merge mouse and human  expression with HPO/MP Terms again to ensure there are not wrongly mapped
 
 
+Human.Mouse.Expression.pheno.hpo_<- left_join(Human.Mouse.Expression.pheno.hpo,hp.mp.toplevelmapping,
+                                    by=c("mp.description"="mp.top.description", "HPO.superclass.description"="hp.top.term"))
+View(Human.Mouse.Expression.pheno.hpo_)
 
-
-Mouse.Expression.COUNT.HPO<- merge(Mouse.Expression.COUNT,hp.mp.toplevelmapping,
-                                   by.x = "mp.description", by.y="mp.top.description")
-names(Mouse.Expression.COUNT.HPO)[names(Mouse.Expression.COUNT.HPO)=="hp.top.description"] <- "HPO.superclass.description"
-#View(Mouse.Expression.COUNT.HPO)
-
-
-#####################################################################################################################
-################################################################################################################################
-
-# merge human and mouse
-Mice.Human.expression.COUNT<- merge(Human_genes_expression_COUNT,Mouse.Expression.COUNT.HPO)
-
-Mice.Human.expression.COUNT<-Mice.Human.expression.COUNT%>%
-  select_all()%>%
+Human.Mouse.Expression.pheno.hpo_CLEANED<-Human.Mouse.Expression.pheno.hpo_%>%
+  select(MGI.ID, HGNC.ID, mp.description,GTEX.tissues,HPO.superclass.description,
+         MP.Term, TS28.mutant.expression.detected,`TPM >/= 0.1 TPM`, `TPM >/= 1 TPM` )%>%
+  drop_na()%>%
   distinct()
 
-View(Mice.Human.expression.COUNT)
+
+View(Human.Mouse.Expression.pheno.hpo_CLEANED)
+######################################################################################################################
+
+# ##!!!!!!!!UNHASH TO SAVE FILE !!!!!!!
+# write.csv(Human.Mouse.Expression.pheno.hpo_CLEANED,
+#           './Output_Files/Human_vs_Mouse/Human.Mouse.Expression.pheno.hpo_CLEANED.csv')
 
 
+
+#### READ CSV
+# 
+# Human.Mouse.Expression.pheno.hpo_CLEANED<-read.csv('./Output_Files/Human_vs_Mouse/Human.Mouse.Expression.pheno.hpo_CLEANED.csv')
+#  
+# View(Human.Mouse.Expression.pheno.hpo_CLEANED)
 #####################################################################################################################
 ################################################################################################################################
 
-# Visualise Mice.Human.expression.COUNT
+# Visualise Mice.Human.expression
 
-Mice.Human.expression.COUNT_<-Mice.Human.expression.COUNT%>%
-  select_all()%>% # select columns of interest
+Mice.Human.expression.COUNT_<-Human.Mouse.Expression.pheno.hpo_CLEANED%>%
+  select(HGNC.ID ,GTEX.tissues,MP.Term, HPO.superclass.description, mp.description,
+         MGI.ID,`TPM >/= 1 TPM`, `TPM >/= 0.1 TPM`, TS28.mutant.expression.detected)%>%
   distinct() %>% # check again for duplicated rows
-  mutate(HPO.MP = paste0(HPO.superclass.description,"+",mp.description))%>%
-  distinct(HPO.MP, `Number of genes at > 0.1 TPM`,
-           `Number of genes at > 1 TPM`, Knockout.Mice)
-
-#names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="Number of genes at > 0 TPM"] <- "Human Genes with Expression > 0 TPM"
-
-names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="Number of genes at > 0.1 TPM"] <- "Human Genes with Expression >/= 0.1 TPM"
-
-names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="Number of genes at > 1 TPM"] <- "Human Genes with Expression >/= 1 TPM"
-
-#names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="KO.MICE.EXPRESSION"] <- "Knockout Mice"
+  dplyr::mutate(HPO.MP = paste0(HPO.superclass.description,"+",mp.description))%>%
+  distinct(HPO.MP, HGNC.ID ,GTEX.tissues,MP.Term, MGI.ID,`TPM >/= 1 TPM`, `TPM >/= 0.1 TPM` , TS28.mutant.expression.detected)
 
 
-Mice.Human.expression.COUNT_ <- Mice.Human.expression.COUNT_ %>% 
-  gather("Expression Type","Number of Genes", `Human Genes with Expression >/= 0.1 TPM`,
-        `Human Genes with Expression >/= 1 TPM`, `Knockout.Mice`)%>%
-  select(`Expression Type`,`Number of Genes`, HPO.MP)%>%
-  distinct(`Expression Type`,`Number of Genes`, HPO.MP)
+names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)== "TPM >/= 0.1 TPM" ] <- "Human Genes with Expression >/= 0.1 TPM"
+
+names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="TPM >/= 1 TPM"] <- "Human Genes with Expression >/= 1 TPM"
+
+names(Mice.Human.expression.COUNT_)[names(Mice.Human.expression.COUNT_)=="TS28.mutant.expression.detected"] <- "KO Gene Expression"
+
 
 View(Mice.Human.expression.COUNT_)
 
 
 
+Mice.Human.expression.CLEANED <- Mice.Human.expression.COUNT_ %>% 
+  gather("Expression Type","Gene Expression",`Human Genes with Expression >/= 0.1 TPM`,
+         `Human Genes with Expression >/= 1 TPM`, `KO Gene Expression` )%>%
+  select(MGI.ID, HGNC.ID,`Expression Type`,`Gene Expression`, HPO.MP, GTEX.tissues,MP.Term)%>%
+  distinct(MGI.ID, HGNC.ID,GTEX.tissues,MP.Term,`Expression Type`,`Gene Expression`, HPO.MP)
+
+View(Mice.Human.expression.CLEANED)
 
 
-# write.csv(Mice.Human.expression.COUNT_,
-#           './Output_Files/Human_vs_Mouse/Mice.Human.expression.COUNT_.csv')
+
+#################################################################################################
+
+
+
+## Filter gene expression FOR NERVOUS SYSTEM 
+
+
+Mice.Human.expression.NS<-Mice.Human.expression.CLEANED%>%
+  select_all()%>%
+  filter(HPO.MP=="Abnormality of the nervous system+nervous system phenotype")%>%
+  distinct(HPO.MP, HGNC.ID,MGI.ID,GTEX.tissues, MP.Term,`Gene Expression`, `Expression Type` )
+View(Mice.Human.expression.NS)
+
+
+
+## Change yes to 1 and no to 2 (2 will be changed to 0 later, dcast does not recognise 0 )
+
+Mice.Human.expression.NS[Mice.Human.expression.NS[, "Gene Expression"] == "Yes", "Gene Expression"] <- "1"
+
+Mice.Human.expression.NS[Mice.Human.expression.NS[, "Gene Expression"] == "No", "Gene Expression"] <- "2"
+
+Mice.Human.expression.NS[Mice.Human.expression.NS[, "Gene Expression"] == "No", "Gene Expression"] <- "2"
+
+
+View(Mice.Human.expression.NS)
+
+
+library(reshape2)
+
+data_wide <- dcast(Mice.Human.expression.NS,  GTEX.tissues+MP.Term +HPO.MP+MGI.ID+ HGNC.ID ~ `Expression Type`, value.var="Gene Expression")
+
+
+View(data_wide)
+
+
+### CHANGE 2s BACK TO 0S 
+
+data_wide[data_wide[, "Human Genes with Expression >/= 0.1 TPM"] == "2", "Human Genes with Expression >/= 0.1 TPM"] <- "0"
+
+data_wide[data_wide[, "Human Genes with Expression >/= 1 TPM"] == "2", "Human Genes with Expression >/= 1 TPM"] <- "0"
+
+data_wide[data_wide[, "KO Gene Expression"] == "2", "KO Gene Expression"] <- "0"
+
+##CONVERT THE NUMBERS TO NEMRICS
+
+data_wide$`Human Genes with Expression >/= 0.1 TPM`<-as.numeric(data_wide$`Human Genes with Expression >/= 0.1 TPM`)
+
+data_wide$`Human Genes with Expression >/= 1 TPM`<-as.numeric(data_wide$`Human Genes with Expression >/= 1 TPM`)
+
+data_wide$`KO Gene Expression`<-as.numeric(data_wide$`KO Gene Expression`)
+
+
+View(data_wide)
+
+### CREATE UPSETR PLOT
+
+library('UpSetR')
+
+upset(data_wide, 
+      sets = c("KO Gene Expression",
+               "Human Genes with Expression >/= 0.1 TPM", 
+               "Human Genes with Expression >/= 1 TPM"), 
+      order.by="degree", matrix.color="red", point.size=5,
+      mainbar.y.label = "Number of Expressions Detected in Tissues 
+      Associated with Nervous System Phenotype", sets.x.label = "Number of Expressions Detected for each Condition", 
+      sets.bar.color=c("maroon","blue","orange"))
+
+
 
 #####################################################################################################################
 ################################################################################################################################
-
-## PLOT
-
-library(ggplot2)
-
-mouse.human.p1<-ggplot(Mice.Human.expression.COUNT_, aes(fill=Mice.Human.expression.COUNT_$Expression, 
-                                                        y=Mice.Human.expression.COUNT_$`Number of Genes`,
-                                                        x=Mice.Human.expression.COUNT_$HPO.MP))%>% 
-  
-  + labs(x= "HPO Toplevel (Human) + MP Toplevel (Mouse)", y="Number of Genes", 
-         subtitle= "Number of Genes Expressed for each Human Phenotype Ontology (HPO) and Mammalian Phenotype (MP) Annotation")%>%
-  + guides(fill=guide_legend(title="Gene Expression: ")) %>%
-  +theme(axis.title=element_text(size=14,face="bold"),
-        plot.caption=element_text(face = "italic", size=14, hjust = 0),
-        text = element_text(size=14),
-        legend.position = "bottom",legend.direction = "horizontal",
-        legend.background = element_rect(fill="lightyellow", size=0.5, linetype = "solid"),
-        axis.text.y= element_text(size=14),
-        axis.text.x= element_text(size=14),
-        panel.border = element_rect(colour = "black", fill=NA, size=1)) %>%
-  +geom_bar(stat="identity")%>%   
-  +geom_text(aes(label=paste0(Mice.Human.expression.COUNT_$`Number of Genes`)),
-             size = 4, position = position_stack(vjust = 0.5), 
-             colour=c("black"), fontface='bold') %>%
-  +facet_wrap(~Mice.Human.expression.COUNT_$`Expression Type` , scales = "free_x")%>%
-  + coord_flip()
-  
-mouse.human.p1
+### Cardiovascular
 
 
 
-## !!!!!!UNHASH TO SAVE PLOT!!!!!!!
-# library(cowplot)
-# 
-# save_plot(paste("D:/MSC RESEARCH PROJECT/Plots/Human+Mouse/mouse.human.p2.png"),
-#           mouse.human.p1 ,base_height= 10 ,base_aspect_ratio = 2) 
+Mice.Human.expression.CD<-Mice.Human.expression.CLEANED%>%
+  select_all()%>%
+  filter(HPO.MP=="Abnormality of the cardiovascular system+cardiovascular system phenotype")%>%
+  distinct(HPO.MP, HGNC.ID,MGI.ID,GTEX.tissues, MP.Term,`Gene Expression`, `Expression Type` )
+View(Mice.Human.expression.CD)
 
 
-################################################################################################################################
-################################################################################################################################
- 
- 
+
+## Change yes to 1 and no to 2 (2 will be changed to 0 later, dcast does not recognise 0 )
+
+Mice.Human.expression.CD[Mice.Human.expression.CD[, "Gene Expression"] == "Yes", "Gene Expression"] <- "1"
+
+Mice.Human.expression.CD[Mice.Human.expression.CD[, "Gene Expression"] == "No", "Gene Expression"] <- "2"
+
+Mice.Human.expression.CD[Mice.Human.expression.CD[, "Gene Expression"] == "No", "Gene Expression"] <- "2"
+
+
+View(Mice.Human.expression.CD)
+
+
+library(reshape2)
+
+data_wide_CD <- dcast(Mice.Human.expression.CD,  GTEX.tissues+MP.Term +HPO.MP+MGI.ID+ HGNC.ID ~ `Expression Type`, value.var="Gene Expression")
+
+
+View(data_wide_CD)
+
+
+### CHANGE 2s BACK TO 0S 
+
+data_wide_CD[data_wide_CD[, "Human Genes with Expression >/= 0.1 TPM"] == "2", "Human Genes with Expression >/= 0.1 TPM"] <- "0"
+
+data_wide_CD[data_wide_CD[, "Human Genes with Expression >/= 1 TPM"] == "2", "Human Genes with Expression >/= 1 TPM"] <- "0"
+
+data_wide_CD[data_wide_CD[, "KO Gene Expression"] == "2", "KO Gene Expression"] <- "0"
+
+##CONVERT THE NUMBERS TO NEMRICS
+
+data_wide_CD$`Human Genes with Expression >/= 0.1 TPM`<-as.numeric(data_wide_CD$`Human Genes with Expression >/= 0.1 TPM`)
+
+data_wide_CD$`Human Genes with Expression >/= 1 TPM`<-as.numeric(data_wide_CD$`Human Genes with Expression >/= 1 TPM`)
+
+data_wide_CD$`KO Gene Expression`<-as.numeric(data_wide_CD$`KO Gene Expression`)
+
+
+View(data_wide_CD)
+
+### CREATE UPSETR PLOT
+
+library('UpSetR')
+
+upset(data_wide_CD, 
+      sets = c("KO Gene Expression",
+               "Human Genes with Expression >/= 0.1 TPM", 
+               "Human Genes with Expression >/= 1 TPM"), 
+      order.by="degree", matrix.color="red", point.size=5,
+      mainbar.y.label = "Number of Expressions Detected in Tissues 
+      Associated with Cardiovascular System Phenotype", sets.x.label = "Number of Expressions Detected for each Condition", 
+      sets.bar.color=c("blue","orange", "maroon"))
+
+
+
